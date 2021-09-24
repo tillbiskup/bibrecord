@@ -1,0 +1,17 @@
+package:
+  name: 'bibrecord'
+  author: 'Till Biskup'
+  author_email: 'till@till-biskup.de'
+  year: '2021'
+  description: 'Handling bib(tex) records for references'
+  urls:
+    documentation: 'https://bibrecord.docs.till-biskup.de/'
+    source: 'https://github.com/tillbiskup/bibrecord'
+  keywords: ['bibliography', 'bibtex', 'literature', 'cite', 'references']
+  install_requires: []
+documentation:
+  logo: ''
+  favicon: ''
+options:
+  logging: true
+  git: true
