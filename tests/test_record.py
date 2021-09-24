@@ -292,3 +292,62 @@ class TestArticle(unittest.TestCase):
         output = f"{authors}: {self.title}. {self.journal} {self.volume}:" \
                  f"{self.pages}, {self.year}."
         self.assertEqual(output, article.to_string())
+
+    def test_to_bib_returns_bibtex_record_with_correct_type(self):
+        output = "@Article{,\n\n}"
+        self.assertEqual(self.article.to_bib(), output)
+
+
+class TestBook(unittest.TestCase):
+
+    def setUp(self):
+        self.book = record.Book()
+        self.author = ['John Doe']
+        self.title = 'Lorem ipsum'
+        self.publisher = 'Springer'
+        self.year = '1968'
+        self.address = 'Berlin'
+        self.edition = '1'
+
+    def test_instantiate_class(self):
+        pass
+
+    def test_has_properties(self):
+        for prop in ['author', 'editor', 'title', 'publisher', 'year',
+                     'address', 'edition']:
+            self.assertTrue(hasattr(self.book, prop))
+
+    def test_properties_can_be_set_by_instantiation(self):
+        book = record.Book(author=self.author)
+        self.assertEqual(self.author, book.author)
+
+    def test_has_sensible_default_format(self):
+        book = record.Book(
+            author=self.author,
+            title=self.title,
+            publisher=self.publisher,
+            year=self.year,
+            address=self.address,
+        )
+        authors = ', '.join(self.author)
+        output = f"{authors}: {self.title}. {self.publisher}, {self.address} " \
+                 f"{self.year}."
+        self.assertEqual(output, book.to_string())
+
+    def test_with_editor_has_sensible_default_format(self):
+        book = record.Book(
+            editor=self.author,
+            title=self.title,
+            publisher=self.publisher,
+            year=self.year,
+            address=self.address,
+        )
+        editors = ', '.join(self.author)
+        output = f"{editors} (Ed.): {self.title}. {self.publisher}," \
+                 f" {self.address} " \
+                 f"{self.year}."
+        self.assertEqual(output, book.to_string())
+
+    def test_to_bib_returns_bibtex_record_with_correct_type(self):
+        output = "@Book{,\n\n}"
+        self.assertEqual(self.book.to_bib(), output)

@@ -3,6 +3,103 @@ Facilities for representing bibliographic records.
 
 Bibliographic records form the basis of bibliographies and proper citations
 of other people's work, particularly in humanities and science.
+
+
+Types of bibliographic records
+==============================
+
+The different types of bibliographic records follow closely the standard set
+by the BibTeX system.
+
+.. note::
+
+    While currently, not all bibliographic record types BibTeX supports and
+    knows are implemented, and for those implemented not all fields are
+    supported, the idea is to eventually support at least all record types.
+
+
+The following types of bibliographic records are currently supported:
+
+* :class:`Article`
+
+  Probably the primary way of publishing nowadays in science is to write an
+  article and to submit this article to a journal for publication.
+
+* :class:`Book`
+
+  Books are probably the most important type of literature in general,
+  and in science the second important type besides articles appearing in
+  journals.
+
+For details, have a look at the documentation of the respective classes.
+
+
+Base classes
+============
+
+Key to the module is a series of base classes that make implementing classes
+for concrete types of bibliographic records straight-forward and simple:
+
+* :class:`Record`
+
+  Base class for each bibliographic record.
+
+* :class:`Person`
+
+  Representation of a person's name.
+
+  Names consist, according to BibTeX, of four parts: first (given names),
+  last (family name), particle (*e.g.*, von), suffix (*e.g.*, Jr., III). To
+  properly handle these four parts and to allow for switching between "FIRST
+  LAST" and "LAST, FIRST" mode of display is the duty of this class.
+
+
+Implementing additional types
+=============================
+
+All types of bibliographic records inherit from :class:`Record`. Usually,
+there is not much left to do to implement an additional class, besides
+setting the properties (aka fields of the bibliographic record) in the
+constructor. However, a few things are crucial and deserve explicit mentioning:
+
+* Attributes should be settable using the constructor.
+
+  This greatly facilitates using the classes in their original intended
+  setting, namely storing bibliographic records within a class implementing
+  an algorithm in a somewhat structured and natural way.
+
+* Each type needs to implement a non-public attribute :attr:`_type` that is
+  set to ``__class__.__name__``.
+
+* The constructor needs to call the constructor of the super class,
+  by using ``super().__init__(key=key)``. Note that here, the key is passed.
+  Hence, add the key property explicitly to your class constructor as well.
+
+* Provide a default format in the property ``self.format``.
+
+Taken together, the constructor of a class may look as follows (this is a
+stripped-down example of the :class:`Book` class):
+
+.. code-block::
+
+    def __init__(self, key='', author=None, title='', publisher='', year=''):
+        super().__init__(key=key)
+        self.author = author or []
+        self.title = title
+        self.publisher = publisher
+        self.year = year
+        self.format = 'author: title. publisher, year.'
+        self._type = __class__.__name__
+
+Please note that author (and editor) fields are always lists. Hence,
+the default is not the empty list (as this is mutable), but ``None``.
+Therefore the property is set to either the value of the constructor
+keyword or to the empty list.
+
+
+Module documentation
+====================
+
 """
 
 import logging
@@ -47,6 +144,7 @@ class Record:
         self.key = key
         self.format = ''
         self.reverse = False
+        self._type = __class__.__name__
         self._exclude = ['reverse', 'key', 'format']
 
     def to_string(self):
@@ -78,7 +176,8 @@ class Record:
             value = getattr(self, prop)
             if prop in ['author', 'editor']:
                 value = ', '.join([self._person_to_string(x) for x in value])
-            output = output.replace(prop, value)
+            if value:
+                output = output.replace(prop, value)
         return output
 
     def to_bib(self):
@@ -125,7 +224,7 @@ class Record:
                                           for x in value])
                 items.append(f"\t{prop} = {{{value}}}")
         string_items = ',\n'.join(items)
-        output = f"@{__class__.__name__}{{{self.key},\n{string_items}\n}}"
+        output = f"@{self._type}{{{self.key},\n{string_items}\n}}"
         return output
 
     def _get_public_properties(self):
@@ -409,7 +508,7 @@ class Article(Record):
 
     .. code-block:: text
 
-        @Record{timm-aaa-300-707,
+        @Article{timm-aaa-300-707,
             author = {J. Timmer AND M. König},
             title = {On generating power law noise},
             journal = {Astronomy and Astrophysics},
@@ -423,10 +522,11 @@ class Article(Record):
 
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(self, key='', author=None, title='', journal='', year='',
                  volume='', pages='', doi=''):
         super().__init__(key=key)
-        self.author = author
+        self.author = author or []
         self.title = title
         self.journal = journal
         self.year = year
@@ -434,3 +534,197 @@ class Article(Record):
         self.pages = pages
         self.doi = doi
         self.format = 'author: title. journal volume:pages, year.'
+        self._type = __class__.__name__
+
+
+class Book(Record):
+    """
+    Bibliographic record for a book.
+
+    Books are probably the most important type of literature in general,
+    and in science the second important type besides articles appearing in
+    journals.
+
+    The four essential properties of a bibliographic record of a book,
+    according to BibTeX, are: :attr:`author` *or* :attr:`editor`,
+    :attr:`title`, :attr:`publisher`, and :attr:`year`.
+
+    Of course, to make sense of such a record, usually you would like to
+    have at least :attr:`address` in addition to those properties.
+
+    Optionally, you would like to give details of the :attr:`edition` of the
+    book as well.
+
+
+    Attributes
+    ----------
+    author : :class:`list`
+        List of author names (as strings)
+
+        Note: You should only provide either authors or editors.
+
+    editor : :class:`list`
+        List of editor names (as strings)
+
+        Note: You should only provide either authors or editors.
+
+    title : :class:`str`
+        Title of the book
+
+    publisher : :class:`str`
+        Name of the publisher of the book
+
+    year : :class:`str`
+        Year the book was published
+
+    address : :class:`str`
+        Address of the publisher of the book (usually the name of the city/town)
+
+    edition : :class:`str`
+        Information on the edition of the book (if not first edition)
+
+
+    Examples
+    --------
+    One use case (and the original reason for writing this package) is to
+    specify a bibliographic record within another class, for example in case
+    you've implemented an algorithm and want to give credit to the original
+    authors in a somewhat portable way. As you can directly give the
+    properties on object instantiation, this looks quite natural:
+
+    .. code-block::
+
+        reference = Book(
+            author=['A. Abragam'],
+            title="Principles of Nuclear Magnetism",
+            publisher="Oxford University Press",
+            year="1961",
+            address="Oxford, UK"
+        )
+
+    If you would want to output the above reference as a string, simply use
+    the :meth:`to_string` method:
+
+    .. code-block::
+
+        reference.to_string()
+
+    With the default format, this would result in the following text:
+
+    .. code-block:: text
+
+        A. Abragam: Principles of Nuclear Magnetism. Oxford University
+        Press, Oxford, UK 1961.
+
+    Note that the line break is a matter of display here and not contained
+    in the original string output. Of course, if you would like to revert
+    the names, *i.e.* having the first name printed last, this can be done
+    as well:
+
+    .. code-block::
+
+        reference.reverse = True
+        reference.to_string()
+
+    With the default format, this would result in the following text:
+
+    .. code-block:: text
+
+        Abragam, A.: Principles of Nuclear Magnetism. Oxford University
+        Press, Oxford, UK 1961.
+
+    If you would want to create a BibTeX record from this, make sure to
+    first add a key:
+
+    .. code-block::
+
+        reference.key = 'abragam-a-1961'
+        reference.to_bib()
+
+    The output of ``print(reference.to_bib())`` would look as follows:
+
+    .. code-block:: text
+
+        @Book{abragam-a-1961,
+            author = {A. Abragam},
+            title = {Principles of Nuclear Magnetism},
+            publisher = {Oxford University Press},
+            year = {1961},
+            address = {Oxford, UK}
+        }
+
+    Thus, you can easily create a BibTeX bibliography from your bibliography
+    records that should work well with BibTeX.
+
+    Similarly, if you have a book that has an editor (or a list of editors) 
+    rather than an author/authors, you would define your bibliographic 
+    record like so:
+
+    .. code-block::
+
+        reference = Book(
+            editor=['Arnold J. Hoff'],
+            title="Advanced EPR. Applications in Biology and Biochemistry",
+            publisher="Elsevier",
+            year="1989",
+            address="Amsterdam"
+        )
+
+    If you would want to output the above reference as a string, simply use
+    the :meth:`to_string` method, as before:
+
+    .. code-block::
+
+        reference.to_string()
+
+    With the default format, this would result in the following text:
+
+    .. code-block:: text
+
+        Arnold J. Hoff (Ed.): Advanced EPR. Applications in Biology and
+        Biochemistry. Elsevier, Amsterdam 1989.
+
+    Note that the line break is a matter of display here and not contained
+    in the original string output.
+
+    """
+
+    # pylint: disable=too-many-arguments
+    def __init__(self, key='', author=None, editor=None, title='',
+                 publisher='', year='', address='', edition=''):
+        super().__init__(key=key)
+        self.author = author or []
+        self.editor = editor or []
+        self.title = title
+        self.publisher = publisher
+        self.year = year
+        self.address = address
+        self.edition = edition
+        self.format = 'author: title. publisher, address year.'
+        self._type = __class__.__name__
+
+    def to_string(self):
+        """
+        Return string representation of a bibliographic record.
+
+        The format of the resulting string is controlled by the property
+        :attr:`format`. There, you can use all the public properties of the
+        class that form part of the bibliographic record, such as "author",
+        "title", and alike.
+
+        The properties "author" and "editor" are treated specially, to ensure
+        the names to be appropriately formatted. Furthermore, in case of the
+        :attr:`editor` property not being empty, the editors' rather than
+        the authors' names are listed, and "(Ed.)" added to the end.
+
+        For further details of this method, see :meth:`Record.to_string`.
+
+        Returns
+        -------
+        output : :class:`str`
+            String representation of a bibliography record
+
+        """
+        if self.editor:
+            self.format = self.format.replace('author', 'editor (Ed.)')
+        return super().to_string()
