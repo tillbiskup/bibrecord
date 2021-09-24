@@ -11,6 +11,10 @@ class TestRecord(unittest.TestCase):
     def test_instantiate_class(self):
         pass
 
+    def test_key_property_can_be_set_by_instantiation(self):
+        record_ = record.Record(key='foo')
+        self.assertEqual('foo', record_.key)
+
     def test_has_to_string_method(self):
         self.assertTrue(hasattr(self.record, 'to_string'))
         self.assertTrue(callable(self.record.to_string))
@@ -67,6 +71,11 @@ class TestRecord(unittest.TestCase):
     def test_to_bib_with_property_adds_property_to_bibtex_record(self):
         self.record.author = ['John Doe']
         output = "@Record{,\n\tauthor = {John Doe}\n}"
+        self.assertEqual(self.record.to_bib(), output)
+
+    def test_to_bib_with_empty_property_returns_empty_bibtex_record(self):
+        output = "@Record{,\n\n}"
+        self.record.title = ''
         self.assertEqual(self.record.to_bib(), output)
 
     def test_to_bib_with_properties_adds_properties_to_bibtex_record(self):
@@ -245,3 +254,41 @@ class TestPerson(unittest.TestCase):
         self.person.from_bib(string)
         self.person.to_bib()
         self.assertFalse(self.person.reverse)
+
+
+class TestArticle(unittest.TestCase):
+
+    def setUp(self):
+        self.article = record.Article()
+        self.author = ['John Doe']
+        self.title = 'Lorem ipsum'
+        self.journal = 'J. Peculiar Res.'
+        self.volume = '42'
+        self.pages = '0'
+        self.year = '1968'
+
+    def test_instantiate_class(self):
+        pass
+
+    def test_has_properties(self):
+        for prop in ['author', 'title', 'journal', 'year', 'volume', 'pages',
+                     'doi']:
+            self.assertTrue(hasattr(self.article, prop))
+
+    def test_properties_can_be_set_by_instantiation(self):
+        article = record.Article(author=self.author)
+        self.assertEqual(self.author, article.author)
+
+    def test_has_sensible_default_format(self):
+        article = record.Article(
+            author=self.author,
+            title=self.title,
+            journal=self.journal,
+            volume=self.volume,
+            pages=self.pages,
+            year=self.year
+        )
+        authors = ', '.join(self.author)
+        output = f"{authors}: {self.title}. {self.journal} {self.volume}:" \
+                 f"{self.pages}, {self.year}."
+        self.assertEqual(output, article.to_string())

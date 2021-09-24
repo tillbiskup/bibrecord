@@ -43,8 +43,8 @@ class Record:
 
     """
 
-    def __init__(self):
-        self.key = ''
+    def __init__(self, key=''):
+        self.key = key
         self.format = ''
         self.reverse = False
         self._exclude = ['reverse', 'key', 'format']
@@ -118,11 +118,12 @@ class Record:
         """
         items = []
         for prop in self._get_public_properties():
-            value = getattr(self, prop)
-            if prop in ['author', 'editor']:
-                value = ' AND '.join([self._person_to_string(x, bib=True)
-                                      for x in value])
-            items.append(f"\t{prop} = {{{value}}}")
+            if getattr(self, prop):
+                value = getattr(self, prop)
+                if prop in ['author', 'editor']:
+                    value = ' AND '.join([self._person_to_string(x, bib=True)
+                                          for x in value])
+                items.append(f"\t{prop} = {{{value}}}")
         string_items = ',\n'.join(items)
         output = f"@{__class__.__name__}{{{self.key},\n{string_items}\n}}"
         return output
@@ -298,3 +299,138 @@ class Person:
         output = self.to_string()
         self.reverse = original_reverse_property
         return output
+
+
+class Article(Record):
+    """
+    Bibliographic record for an article published in a journal.
+
+    Probably the primary way of publishing nowadays in science is to write
+    an article and to submit this article to a journal for publication.
+
+    The four essential properties of a bibliographic record of an article,
+    according to BibTeX, are: :attr:`author`, :attr:`title`, :attr:`journal`,
+    and :attr:`year`.
+
+    Of course, to make sense of such a record, usually you would like to
+    have at least :attr:`volume` and :attr:`pages` in addition to those
+    properties.
+
+    A purely optional, though sometimes very helpful property is the
+    :attr:`doi`, *i.e.* the unique digital object identifier allowing you to
+    retrieve the electronic version of this article if you happen to have
+    access to the internet (and your institution subscribes to the
+    publisher's content).
+
+
+    Attributes
+    ----------
+    author : :class:`list`
+        List of author names (as strings)
+
+    title : :class:`str`
+        Title of the article
+
+    journal : :class:`str`
+        Name of the journal the article appeared in
+
+    year : :class:`str`
+        Year the article was published
+
+    volume : :class:`str`
+        Volume of the journal the article appeared in
+
+    pages : :class:`str`
+        Range of pages (or article id)
+
+    doi : :class:`str`
+        Digital object identifier referring to the article
+
+
+    Examples
+    --------
+    One use case (and the original reason for writing this package) is to
+    specify a bibliographic record within another class, for example in case
+    you've implemented an algorithm and want to give credit to the original
+    authors in a somewhat portable way. As you can directly give the
+    properties on object instantiation, this looks quite natural:
+
+    .. code-block::
+
+        reference = Article(
+            author=['J. Timmer', 'M. König'],
+            title="On generating power law noise",
+            journal="Astronomy and Astrophysics",
+            volume="300",
+            pages="707--710",
+            year="1995"
+        )
+
+    If you would want to output the above reference as a string, simply use
+    the :meth:`to_string` method:
+
+    .. code-block::
+
+        reference.to_string()
+
+    With the default format, this would result in the following text:
+
+    .. code-block:: text
+
+        J. Timmer, M. König: On generating power law noise. Astronomy and
+        Astrophysics 300:707--710, 1995.
+
+    Note that the line break is a matter of display here and not contained
+    in the original string output. Of course, if you would like to revert
+    the names, *i.e.* having the first name printed last, this can be done
+    as well:
+
+    .. code-block::
+
+        reference.reverse = True
+        reference.to_string()
+
+    With the default format, this would result in the following text:
+
+    .. code-block:: text
+
+        Timmer, J., König, M.: On generating power law noise. Astronomy and
+        Astrophysics 300:707--710, 1995.
+
+    If you would want to create a BibTeX record from this, make sure to
+    first add a key:
+
+    .. code-block::
+
+        reference.key = 'timm-aaa-300-707'
+        reference.to_bib()
+
+    The output of ``print(reference.to_bib())`` would look as follows:
+
+    .. code-block:: text
+
+        @Record{timm-aaa-300-707,
+            author = {J. Timmer AND M. König},
+            title = {On generating power law noise},
+            journal = {Astronomy and Astrophysics},
+            year = {1995},
+            volume = {300},
+            pages = {707--710}
+        }
+
+    Thus, you can easily create a BibTeX bibliography from your bibliography
+    records that should work well with BibTeX.
+
+    """
+
+    def __init__(self, key='', author=None, title='', journal='', year='',
+                 volume='', pages='', doi=''):
+        super().__init__(key=key)
+        self.author = author
+        self.title = title
+        self.journal = journal
+        self.year = year
+        self.volume = volume
+        self.pages = pages
+        self.doi = doi
+        self.format = 'author: title. journal volume:pages, year.'
