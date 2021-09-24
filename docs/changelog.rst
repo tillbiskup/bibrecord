@@ -12,5 +12,5 @@ Not yet released
 
 * First public release
 
-* ...
+* Support for article and book bibliographic record types
 
