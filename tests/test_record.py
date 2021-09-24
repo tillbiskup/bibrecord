@@ -18,6 +18,36 @@ class TestRecord(unittest.TestCase):
     def test_to_string_returns_string(self):
         self.assertTrue(isinstance(self.record.to_string(), str))
 
+    def test_to_string_with_format_and_properties_returns_string(self):
+        self.record.format = 'author: title'
+        self.record.author = ['John Doe']
+        self.record.title = 'Lorem ipsum'
+        output = f"{self.record.author[0]}: {self.record.title}"
+        self.assertEqual(output, self.record.to_string())
+
+    def test_to_string_with_format_and_authors_returns_string(self):
+        self.record.format = 'author: title'
+        self.record.author = ['John Doe', 'Max Mustermann']
+        self.record.title = 'Lorem ipsum'
+        authors = ', '.join(self.record.author)
+        output = f"{authors}: {self.record.title}"
+        self.assertEqual(output, self.record.to_string())
+
+    def test_to_string_with_format_and_author_with_suffix_returns_string(self):
+        self.record.format = 'author: title'
+        self.record.author = ['Doe, Jr., John']
+        self.record.title = 'Lorem ipsum'
+        output = f"John Doe, Jr.: {self.record.title}"
+        self.assertEqual(output, self.record.to_string())
+
+    def test_to_string_with_format_and_author_and_reverse_returns_string(self):
+        self.record.format = 'author: title'
+        self.record.author = ['John Doe']
+        self.record.title = 'Lorem ipsum'
+        self.record.reverse = True
+        output = f"Doe, John: {self.record.title}"
+        self.assertEqual(output, self.record.to_string())
+
     def test_has_to_bib_method(self):
         self.assertTrue(hasattr(self.record, 'to_bib'))
         self.assertTrue(callable(self.record.to_bib))
@@ -26,18 +56,34 @@ class TestRecord(unittest.TestCase):
         self.assertTrue(isinstance(self.record.to_string(), str))
 
     def test_to_bib_returns_bibtex_record(self):
-        output = "@Record{\n\n}"
+        output = "@Record{,\n\n}"
+        self.assertEqual(self.record.to_bib(), output)
+
+    def test_to_bib_with_key_returns_bibtex_record_with_key(self):
+        output = "@Record{foo,\n\n}"
+        self.record.key = 'foo'
         self.assertEqual(self.record.to_bib(), output)
 
     def test_to_bib_with_property_adds_property_to_bibtex_record(self):
-        self.record.author = 'John Doe'
-        output = "@Record{\n\tauthor = {John Doe}\n}"
+        self.record.author = ['John Doe']
+        output = "@Record{,\n\tauthor = {John Doe}\n}"
         self.assertEqual(self.record.to_bib(), output)
 
     def test_to_bib_with_properties_adds_properties_to_bibtex_record(self):
-        self.record.author = 'John Doe'
+        self.record.author = ['John Doe']
         self.record.title = 'Lorem ipsum'
-        output = "@Record{\n\tauthor = {John Doe},\n\ttitle = {Lorem ipsum}\n}"
+        output = "@Record{,\n\tauthor = {John Doe},\n\ttitle = {Lorem ipsum}\n}"
+        self.assertEqual(self.record.to_bib(), output)
+
+    def test_to_bib_with_author_reversed_adds_author_to_bibtex_record(self):
+        self.record.author = ['John Doe']
+        self.record.reverse = True
+        output = "@Record{,\n\tauthor = {Doe, John}\n}"
+        self.assertEqual(self.record.to_bib(), output)
+
+    def test_to_bib_with_authors_adds_authors_to_bibtex_record(self):
+        self.record.author = ['John Doe', 'Max Mustermann']
+        output = "@Record{,\n\tauthor = {John Doe AND Max Mustermann}\n}"
         self.assertEqual(self.record.to_bib(), output)
 
 
@@ -197,5 +243,5 @@ class TestPerson(unittest.TestCase):
         string = '{} {}, {}'.format(self.particle, self.last, self.first)
         self.person.reverse = False
         self.person.from_bib(string)
-        output = self.person.to_bib()
+        self.person.to_bib()
         self.assertFalse(self.person.reverse)

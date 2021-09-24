@@ -1,5 +1,8 @@
 """
-record module of the bibrecord package.
+Facilities for representing bibliographic records.
+
+Bibliographic records form the basis of bibliographies and proper citations
+of other people's work, particularly in humanities and science.
 """
 
 import logging
@@ -10,53 +13,136 @@ logger = logging.getLogger(__name__)
 
 class Record:
     """
-    Base class for each bibliography record.
+    Base class for each bibliographic record.
 
-    More description comes here...
-
+    Actual bibliographic records are represented by classes inheriting from
+    this class. The types of bibliographic records follow those known from
+    BibTeX.
 
     Attributes
     ----------
-    attr : :class:`None`
-        Short description
+    format : :class:`str`
+        Format string used create string representation of bibliographic record
 
-    Raises
-    ------
-    exception
-        Short description when and why raised
+        For details, see :meth:`to_string`
+
+    key : :class:`str`
+        BibTeX key used to refer to the record
+
+    reverse : :class:`bool`
+        Whether to reverse last and first name in output
+
+        Default: False
 
 
     Examples
     --------
-    It is always nice to give some examples how to use the class. Best to do
-    that with code examples:
-
-    .. code-block::
-
-        obj = Record()
-        ...
-
-    
+    For examples of how to use this class, have a look at the examples of
+    the classes that inherit from this one and implement actual types of
+    bibliographic records.
 
     """
 
-    # noinspection PyMethodMayBeStatic
+    def __init__(self):
+        self.key = ''
+        self.format = ''
+        self.reverse = False
+        self._exclude = ['reverse', 'key', 'format']
+
     def to_string(self):
-        return ''
+        """
+        Return string representation of a bibliographic record.
+
+        The format of the resulting string is controlled by the property
+        :attr:`format`. There, you can use all the public properties of the
+        class that form part of the bibliographic record, such as "author",
+        "title", and alike.
+
+        The properties "author" and "editor" are treated specially, to ensure
+        the names to be appropriately formatted.
+
+        .. note::
+            The aim of this method is currently in no way to allow for
+            advanced formatting including conditionals, as possible with
+            BibTeX styles. It only provides a rudimentary way of converting
+            a bibliographic record into a string representation.
+
+        Returns
+        -------
+        output : :class:`str`
+            String representation of a bibliography record
+
+        """
+        output = self.format
+        for prop in self._get_public_properties():
+            value = getattr(self, prop)
+            if prop in ['author', 'editor']:
+                value = ', '.join([self._person_to_string(x) for x in value])
+            output = output.replace(prop, value)
+        return output
 
     def to_bib(self):
+        """
+        Return BibTeX representation of a bibliography record as string.
+
+        The BibTeX representation generally looks as follows:
+
+        .. code-block::
+
+            @Record(<key>,
+                <property1> = {<value1>},
+                ...
+                <propertyN> = {<valueN>}
+            }
+
+        As you can see from this example, the output is quite opinionated,
+        although BibTeX as such would allow for some slightly different
+        formatting as well. To highlight the most important aspects:
+
+        * Values are surrounded by curly brackets, not quotation marks.
+
+        * The type of record is capitalised.
+
+        * Indentation is done using tabulators.
+
+        The record type is identical to the actual class used. The
+        properties "author" and "editor" are treated specially, to ensure
+        the names to be appropriately formatted.
+
+
+        Returns
+        -------
+        record : :class:`str`
+            BibTeX representation of a bibliography record
+
+        """
         items = []
         for prop in self._get_public_properties():
-            items.append("\t{} = {{{}}}".format(prop, getattr(self, prop)))
-        output = "@{}{{\n{}\n}}".format(__class__.__name__, ',\n'.join(items))
+            value = getattr(self, prop)
+            if prop in ['author', 'editor']:
+                value = ' AND '.join([self._person_to_string(x, bib=True)
+                                      for x in value])
+            items.append(f"\t{prop} = {{{value}}}")
+        string_items = ',\n'.join(items)
+        output = f"@{__class__.__name__}{{{self.key},\n{string_items}\n}}"
         return output
 
     def _get_public_properties(self):
         properties = []
         for prop in list(self.__dict__.keys()):
-            if not str(prop).startswith('_'):
+            if not str(prop).startswith('_') and prop not in self._exclude:
                 properties.append(prop)
         return properties
+
+    def _person_to_string(self, string, bib=False):
+        person = Person()
+        person.reverse = self.reverse
+        person.from_bib(string)
+        if bib:
+            output = person.to_bib()
+        else:
+            output = person.to_string()
+        return output
 
 
 class Person:
@@ -81,24 +167,49 @@ class Person:
     suffix : :class:`str`
         Suffix of a person's last name, such as "Jr." or "III"
 
+    reverse : :class:`bool`
+        Whether to reverse last and first name in output
+
+        Default: False
+
 
     Examples
     --------
-    It is always nice to give some examples how to use the class. Best to do
-    that with code examples:
+    There are different usage scenarios for this class. The first is to
+    populate the properties of an object from a (BibTeX) string:
 
     .. code-block::
 
-        obj = Person()
-        ...
+        person = Person()
+        person.from_bib('John Doe')
+
+    This will result in the object ``person`` having set "John" as its
+    property "first" and "Doe" as its property "last". Note that a person's
+    name consists (according to BibTeX) of four parts. See :meth:`from_bib`
+    for details.
+
+    The other way round, you may want to have a string representation of a
+    person's name, either in plain text representation or for use within a
+    BibTeX record:
+
+    .. code-block::
+
+        string = person.to_string()
+        bib_string = person.to_bib()
+
+    The difference of these two methods is quite subtle, and only present if
+    at least one of "particle" or "suffix" is present. In the latter case,
+    :meth:`to_bib` will return a string that can be understood by BibTeX,
+    *i.e.* with reversed order of names, meaning the first name output last
+    and separated by a comma.
 
     """
 
-    def __init__(self):
-        self.first = ''
-        self.last = ''
-        self.particle = ''
-        self.suffix = ''
+    def __init__(self, first='', last='', particle='', suffix=''):
+        self.first = first
+        self.last = last
+        self.particle = particle
+        self.suffix = suffix
         self.reverse = False
 
     def from_bib(self, string):
@@ -139,18 +250,48 @@ class Person:
             self.first, self.last = string.rsplit(' ', maxsplit=1)
 
     def to_string(self):
+        """
+        Return the string representation of a person's name.
+
+        Depending on the property :attr:`reverse`, the name is returned with
+        first name first or last. Some examples:
+
+        * FIRST LAST
+        * FIRST PARTICLE LAST
+        * FIRST LAST, SUFFIX
+        * FIRST PARTICLE LAST, SUFFIX
+
+        Returns
+        -------
+        string : :class:`str`
+            String representation of a person's name
+
+        """
         last = self.last
         if self.particle:
-            last = '{} {}'.format(self.particle, self.last)
+            last = f'{self.particle} {self.last}'
         if self.suffix:
-            last = '{}, {}'.format(last, self.suffix)
+            last = f'{last}, {self.suffix}'
         if self.reverse:
-            output = '{}, {}'.format(last, self.first)
+            output = f'{last}, {self.first}'
         else:
-            output = '{} {}'.format(self.first, last)
+            output = f'{self.first} {last}'
         return output
 
     def to_bib(self):
+        """
+        Return the BibTeX-compatible string representation of a person's name.
+
+        The output is basically the same as for :meth:`to_string`, as long
+        as neither particle nor suffix are set. If either of these is
+        present, :attr:`reverse` is temporarily set to True.
+
+        Returns
+        -------
+        string : :class:`str`
+            BibTeX-compatible string representation of a person's name
+
+        """
         original_reverse_property = self.reverse
         if self.particle or self.suffix:
             self.reverse = True
