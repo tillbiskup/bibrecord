@@ -140,12 +140,12 @@ class Record:
 
     """
 
-    def __init__(self, key=''):
+    def __init__(self, key=""):
         self.key = key
-        self.format = ''
+        self.format = ""
         self.reverse = False
         self._type = __class__.__name__
-        self._exclude = ['reverse', 'key', 'format']
+        self._exclude = ["reverse", "key", "format"]
 
     def to_string(self):
         """
@@ -174,8 +174,8 @@ class Record:
         output = self.format
         for prop in self._get_public_properties():
             value = getattr(self, prop)
-            if prop in ['author', 'editor']:
-                value = ', '.join([self._person_to_string(x) for x in value])
+            if prop in ["author", "editor"]:
+                value = ", ".join([self._person_to_string(x) for x in value])
             if value:
                 output = output.replace(prop, value)
         return output
@@ -219,18 +219,19 @@ class Record:
         for prop in self._get_public_properties():
             if getattr(self, prop):
                 value = getattr(self, prop)
-                if prop in ['author', 'editor']:
-                    value = ' AND '.join([self._person_to_string(x, bib=True)
-                                          for x in value])
+                if prop in ["author", "editor"]:
+                    value = " AND ".join(
+                        [self._person_to_string(x, bib=True) for x in value]
+                    )
                 items.append(f"\t{prop} = {{{value}}}")
-        string_items = ',\n'.join(items)
+        string_items = ",\n".join(items)
         output = f"@{self._type}{{{self.key},\n{string_items}\n}}"
         return output
 
     def _get_public_properties(self):
         properties = []
         for prop in list(self.__dict__.keys()):
-            if not str(prop).startswith('_') and prop not in self._exclude:
+            if not str(prop).startswith("_") and prop not in self._exclude:
                 properties.append(prop)
         return properties
 
@@ -305,7 +306,7 @@ class Person:
 
     """
 
-    def __init__(self, first='', last='', particle='', suffix=''):
+    def __init__(self, first="", last="", particle="", suffix=""):
         self.first = first
         self.last = last
         self.particle = particle
@@ -336,18 +337,18 @@ class Person:
 
         """
         # Reduce additional whitespace
-        string = re.sub(r'\s{2,}', r' ', string.strip())
-        parts = string.split(',')
+        string = re.sub(r"\s{2,}", r" ", string.strip())
+        parts = string.split(",")
         if len(parts) > 2:
             self.suffix = parts.pop(1).strip()
         if len(parts) > 1:
             self.first = parts[1].strip()
-            last_parts = parts[0].strip().rsplit(' ', maxsplit=1)
+            last_parts = parts[0].strip().rsplit(" ", maxsplit=1)
             if len(last_parts) > 1:
                 self.particle = last_parts.pop(0)
             self.last = last_parts[0]
         else:
-            self.first, self.last = string.rsplit(' ', maxsplit=1)
+            self.first, self.last = string.rsplit(" ", maxsplit=1)
 
     def to_string(self):
         """
@@ -369,13 +370,13 @@ class Person:
         """
         last = self.last
         if self.particle:
-            last = f'{self.particle} {self.last}'
+            last = f"{self.particle} {self.last}"
         if self.suffix:
-            last = f'{last}, {self.suffix}'
+            last = f"{last}, {self.suffix}"
         if self.reverse:
-            output = f'{last}, {self.first}'
+            output = f"{last}, {self.first}"
         else:
-            output = f'{self.first} {last}'
+            output = f"{self.first} {last}"
         return output
 
     def to_bib(self):
@@ -523,8 +524,17 @@ class Article(Record):
     """
 
     # pylint: disable=too-many-arguments
-    def __init__(self, key='', author=None, title='', journal='', year='',
-                 volume='', pages='', doi=''):
+    def __init__(
+        self,
+        key="",
+        author=None,
+        title="",
+        journal="",
+        year="",
+        volume="",
+        pages="",
+        doi="",
+    ):
         super().__init__(key=key)
         self.author = author or []
         self.title = title
@@ -533,7 +543,7 @@ class Article(Record):
         self.volume = volume
         self.pages = pages
         self.doi = doi
-        self.format = 'author: title. journal volume:pages, year.'
+        self.format = "author: title. journal volume:pages, year."
         self._type = __class__.__name__
 
 
@@ -656,8 +666,8 @@ class Book(Record):
     Thus, you can easily create a BibTeX bibliography from your bibliography
     records that should work well with BibTeX.
 
-    Similarly, if you have a book that has an editor (or a list of editors) 
-    rather than an author/authors, you would define your bibliographic 
+    Similarly, if you have a book that has an editor (or a list of editors)
+    rather than an author/authors, you would define your bibliographic
     record like so:
 
     .. code-block::
@@ -690,8 +700,17 @@ class Book(Record):
     """
 
     # pylint: disable=too-many-arguments
-    def __init__(self, key='', author=None, editor=None, title='',
-                 publisher='', year='', address='', edition=''):
+    def __init__(
+        self,
+        key="",
+        author=None,
+        editor=None,
+        title="",
+        publisher="",
+        year="",
+        address="",
+        edition="",
+    ):
         super().__init__(key=key)
         self.author = author or []
         self.editor = editor or []
@@ -700,7 +719,7 @@ class Book(Record):
         self.year = year
         self.address = address
         self.edition = edition
-        self.format = 'author: title. publisher, address year.'
+        self.format = "author: title. publisher, address year."
         self._type = __class__.__name__
 
     def to_string(self):
@@ -726,5 +745,5 @@ class Book(Record):
 
         """
         if self.editor:
-            self.format = self.format.replace('author', 'editor (Ed.)')
+            self.format = self.format.replace("author", "editor (Ed.)")
         return super().to_string()

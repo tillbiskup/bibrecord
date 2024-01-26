@@ -9,20 +9,20 @@ def read(filename):
 
 
 setuptools.setup(
-    name='bibrecord',
-    version=read('VERSION').strip(),
-    description='Handling bib(tex) records for references',
-    long_description=read('README.rst'),
+    name="bibrecord",
+    version=read("VERSION").strip(),
+    description="Handling bib(tex) records for references",
+    long_description=read("README.rst"),
     long_description_content_type="text/x-rst",
-    author='Till Biskup',
-    author_email='till@till-biskup.de',
-    url='',
+    author="Till Biskup",
+    author_email="till@till-biskup.de",
+    url="",
     project_urls={
-        "Documentation": 'https://bibrecord.docs.till-biskup.de/',
-        "Source": 'https://github.com/tillbiskup/bibrecord',
+        "Documentation": "https://bibrecord.docs.till-biskup.de/",
+        "Source": "https://github.com/tillbiskup/bibrecord",
     },
-    packages=setuptools.find_packages(exclude=('tests', 'docs')),
-    license='BSD',
+    packages=setuptools.find_packages(exclude=("tests", "docs")),
+    license="BSD",
     keywords=[
         "bibliography",
         "bibtex",
@@ -40,11 +40,20 @@ setuptools.setup(
         "Intended Audience :: Science/Research",
         "Development Status :: 4 - Beta",
     ],
-    install_requires=[
-    ],
+    install_requires=[],
     extras_require={
-        'dev': ['prospector'],
-        'docs': ['sphinx', 'sphinx-rtd-theme', 'sphinx_multiversion'],
+        "dev": [
+            "prospector",
+            "pyroma",
+            "bandit",
+            "black",
+            "pymetacode",
+        ],
+        "docs": [
+            "sphinx",
+            "sphinx-rtd-theme",
+            "sphinx_multiversion",
+        ],
     },
-    python_requires='>=3.7',
+    python_requires=">=3.7",
 )
