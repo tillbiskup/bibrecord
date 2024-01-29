@@ -20,6 +20,10 @@ For later versions
 
 * Adding all optional properties for record types?
 
+* Explicitly support biblatex-defined record types?
+
+  `<https://mirrors.ctan.org/macros/latex/contrib/biblatex/doc/biblatex.pdf>`_
+
 * Handling of "and" in lists of names? (Caution: internationalisation?)
 
 * Template engine for string output formats

@@ -384,3 +384,75 @@ class TestBook(unittest.TestCase):
     def test_to_bib_returns_bibtex_record_with_correct_type(self):
         output = "@Book{,\n\n}"
         self.assertEqual(self.book.to_bib(), output)
+
+
+class TestDataset(unittest.TestCase):
+    def setUp(self):
+        self.dataset = record.Dataset()
+        self.author = ["John Doe"]
+        self.title = "Lorem ipsum"
+        self.publisher = "Zenodo"
+        self.year = "2024"
+        self.version = "2024-01-29"
+        self.doi = "10.5281/zenodo.00000000"
+        self.url = "https://doi.org/10.5281/zenodo.00000000"
+
+    def test_instantiate_class(self):
+        pass
+
+    def test_has_properties(self):
+        for prop in [
+            "author",
+            "editor",
+            "title",
+            "publisher",
+            "year",
+            "version",
+            "doi",
+            "url",
+        ]:
+            self.assertTrue(hasattr(self.dataset, prop))
+
+    def test_properties_can_be_set_by_instantiation(self):
+        dataset = record.Dataset(author=self.author)
+        self.assertEqual(self.author, dataset.author)
+
+    def test_to_bib_returns_bibtex_record_with_correct_type(self):
+        output = "@Dataset{,\n\n}"
+        self.assertEqual(self.dataset.to_bib(), output)
+
+    def test_has_sensible_default_format(self):
+        dataset = record.Dataset(
+            author=self.author,
+            title=self.title,
+            publisher=self.publisher,
+            year=self.year,
+            version=self.version,
+            doi=self.doi,
+            url=self.url,
+        )
+        authors = ", ".join(self.author)
+        output = (
+            f"{authors}: {self.title} ({self.version}). {self.publisher},"
+            f" DOI:{self.doi}, "
+            f"{self.year}."
+        )
+        self.assertEqual(output, dataset.to_string())
+
+    def test_with_editor_has_sensible_default_format(self):
+        dataset = record.Dataset(
+            editor=self.author,
+            title=self.title,
+            publisher=self.publisher,
+            year=self.year,
+            version=self.version,
+            doi=self.doi,
+            url=self.url,
+        )
+        editors = ", ".join(self.author)
+        output = (
+            f"{editors} (Ed.): {self.title} ({self.version}). {self.publisher},"
+            f" DOI:{self.doi}, "
+            f"{self.year}."
+        )
+        self.assertEqual(output, dataset.to_string())

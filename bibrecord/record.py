@@ -31,6 +31,13 @@ The following types of bibliographic records are currently supported:
   and in science the second important type besides articles appearing in
   journals.
 
+* :class:`Dataset`
+
+  Datasets are increasingly seen as independent research output that should be
+  citable. A typical use case of this record type would be a package containing
+  some published data where for each record, the relevant dataset should be
+  referenced.
+
 For details, have a look at the documentation of the respective classes.
 
 
@@ -720,6 +727,184 @@ class Book(Record):
         self.address = address
         self.edition = edition
         self.format = "author: title. publisher, address year."
+        self._type = __class__.__name__
+
+    def to_string(self):
+        """
+        Return string representation of a bibliographic record.
+
+        The format of the resulting string is controlled by the property
+        :attr:`format`. There, you can use all the public properties of the
+        class that form part of the bibliographic record, such as "author",
+        "title", and alike.
+
+        The properties "author" and "editor" are treated specially, to ensure
+        the names to be appropriately formatted. Furthermore, in case of the
+        :attr:`editor` property not being empty, the editors' rather than
+        the authors' names are listed, and "(Ed.)" added to the end.
+
+        For further details of this method, see :meth:`Record.to_string`.
+
+        Returns
+        -------
+        output : :class:`str`
+            String representation of a bibliography record
+
+        """
+        if self.editor:
+            self.format = self.format.replace("author", "editor (Ed.)")
+        return super().to_string()
+
+
+class Dataset(Record):
+    """
+    Bibliographic record for a dataset.
+
+    Datasets are (fortunately) increasingly seen as independent research output
+    that should be citable. While published datasets are only as good
+    (and useful) as they are annotated, in general publishing data is an
+    excellent idea.
+
+    The class currently closely follows the fields available from Zenodo.
+    Furthermore, the dataset record type is not part of the original BibTeX
+    record types (as the idea of publishing datasets is much younger than
+    BibTeX), but is included in biblatex starting with version 3.13.
+
+
+    Attributes
+    ----------
+    author : :class:`list`
+        List of author names (as strings)
+
+        Note: You should only provide either authors or editors.
+
+    editor : :class:`list`
+        List of editor names (as strings)
+
+        Note: You should only provide either authors or editors.
+
+    title : :class:`str`
+        Title of the dataset
+
+    publisher : :class:`str`
+        Name of the publisher of the dataset (*e.g.*, "Zenodo")
+
+    year : :class:`str`
+        Year the dataset was published
+
+    version : :class:`str`
+        Version of the dataset cited
+
+        Note that datasets often have version numbers or strings
+
+    doi : :class:`str`
+        Digital object identifier referring to the dataset
+
+    url : :class:`str`
+        Uniform Resource Location (URL) referring to the dataset
+
+    Examples
+    --------
+    One use case (and the original reason for writing this package) is to
+    specify a bibliographic record within another class, for example in case
+    you've implemented an algorithm and want to give credit to the original
+    authors in a somewhat portable way. As you can directly give the
+    properties on object instantiation, this looks quite natural:
+
+    .. code-block::
+
+        reference = Dataset(
+            author=['John Doe'],
+            title="Lorem ipsum",
+            publisher="Zenodo",
+            year="2024",
+            version="2024-01-29",
+            doi="10.5281/zenodo.00000000",
+        )
+
+    If you would want to output the above reference as a string, simply use
+    the :meth:`to_string` method:
+
+    .. code-block::
+
+        reference.to_string()
+
+    With the default format, this would result in the following text:
+
+    .. code-block:: text
+
+        John Doe: Lorem ipsum (2024-01-29).
+        Zenodo, DOI:10.5281/zenodo.00000000, 2024.
+
+    Note that the line break is a matter of display here and not contained
+    in the original string output. Of course, if you would like to revert
+    the names, *i.e.* having the first name printed last, this can be done
+    as well:
+
+    .. code-block::
+
+        reference.reverse = True
+        reference.to_string()
+
+    With the default format, this would result in the following text:
+
+    .. code-block:: text
+
+        Doe, John: Lorem ipsum (2024-01-29).
+        Zenodo, DOI:10.5281/zenodo.00000000, 2024.
+
+    If you would want to create a BibTeX record from this, make sure to
+    first add a key:
+
+    .. code-block::
+
+        reference.key = 'timm-aaa-300-707'
+        reference.to_bib()
+
+    The output of ``print(reference.to_bib())`` would look as follows:
+
+    .. code-block:: text
+
+        @Dataset{,
+            author = {John Doe},
+            title = {Lorem ipsum},
+            publisher = {Zenodo},
+            year = {2024},
+            version = {2024-01-29},
+            doi = {10.5281/zenodo.00000000}
+        }
+
+    Thus, you can easily create a BibTeX bibliography from your bibliography
+    records that should work well with BibTeX/biblatex.
+
+
+    .. versionadded:: 0.2
+
+
+    """
+
+    def __init__(
+        self,
+        key="",
+        author=None,
+        editor=None,
+        title="",
+        publisher="",
+        year="",
+        version="",
+        doi="",
+        url="",
+    ):
+        super().__init__(key=key)
+        self.author = author or []
+        self.editor = editor or []
+        self.title = title
+        self.publisher = publisher
+        self.year = year
+        self.version = version
+        self.doi = doi
+        self.url = url
+        self.format = "author: title (version). publisher, DOI:doi, year."
         self._type = __class__.__name__
 
     def to_string(self):
