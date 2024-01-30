@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from bibrecord import bibtex
@@ -56,3 +57,42 @@ class TestEntry(unittest.TestCase):
     def test_from_bib_sets_fields_dict(self):
         self.entry.from_bib(self.book_entry)
         self.assertTrue(self.entry.fields)
+
+
+class TestBibliography(unittest.TestCase):
+    def setUp(self):
+        self.bibliography = bibtex.Bibliography()
+        self.bibtex = "".join([ARTICLE, BOOK])
+        self.filename = "test.bib"
+
+    def tearDown(self):
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+
+    def create_bibtex_file(self):
+        with open(self.filename, "w+", encoding="utf8") as file:
+            file.write(self.bibtex)
+
+    def test_instantiate_class(self):
+        pass
+
+    def test_from_bib_populates_entries(self):
+        self.bibliography.from_bib(self.bibtex)
+        self.assertTrue(self.bibliography.entries)
+
+    def test_from_bib_adds_entries_to_entries(self):
+        self.bibliography.from_bib(self.bibtex)
+        self.assertIsInstance(self.bibliography.entries[0], bibtex.Entry)
+
+    def test_from_bib_without_bibliography_raises(self):
+        with self.assertRaises(ValueError):
+            self.bibliography.from_bib("")
+
+    def test_from_file_adds_entries_to_entries(self):
+        self.create_bibtex_file()
+        self.bibliography.from_file(self.filename)
+        self.assertIsInstance(self.bibliography.entries[0], bibtex.Entry)
+
+    def test_from_file_without_filename_raises(self):
+        with self.assertRaises(ValueError):
+            self.bibliography.from_file("")

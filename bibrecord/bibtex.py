@@ -1,4 +1,4 @@
-"""
+r"""
 Facilities for reading BibTeX bibliographies.
 
 The BibTeX bibliography file format is not too explicitly specified, but there
@@ -15,6 +15,23 @@ of the :class:`Entry` class. This class does *not* provide extended logic for
 dealing with the particular types of bibliographic records, as this is part of
 the :mod:`bibrecord.record` module.
 
+Entire BibTeX bibliographies (as typically residing in \*.bib files) can be read
+and converted into :obj:`Entry` objects using the :class:`Bibliography` class.
+
+
+Classes
+=======
+
+The two important classes for representing BibTeX bibliographies are:
+
+* :class:`Entry`
+
+  Representation of a BibTeX entry.
+
+* :class:`Bibliography`
+
+  Representation of a BibTeX bibliography, *e.g.* as read from a file.
+
 
 Limitations
 ===========
@@ -23,7 +40,7 @@ There are many limitations for the time being, as this module does not intend
 to be a full BibTeX parser.
 
 * BibTeX records are expected to be well-formatted.
-* String replacement is currently *not* supported.
+* String replacement (*e.g.*, for Journal names) is currently *not* supported.
 
 
 Module documentation
@@ -70,7 +87,7 @@ class Entry:
     Examples
     --------
     Assume a BibTeX entry to exist in a multiline string ``bibtex_record``.
-    Converting this multliline string into a :obj:`Entry` object with all the
+    Converting this multiline string into a :obj:`Entry` object with all the
     information accessible for later conversion into a
     :obj:`bibrecord.record.Record` object would look as follows:
 
@@ -151,3 +168,98 @@ class Entry:
                     value.strip(),
                 ).group(1)
                 self.fields[field.strip()] = value
+
+
+class Bibliography:
+    """
+    Representation of a BibTeX bibliography, *e.g.* as read from a file.
+
+    A BibTeX bibliography is a series of individual bibliographic records that
+    can be of different types. For more information on the overall format of
+    BibTeX bibliographies, have a look at the available online resources.
+
+    Here, the bibliography represents the individual bibliographic records
+    contained in a BibTeX bibliography as objects of class :class:`Entry`.
+
+
+    Attributes
+    ----------
+    entries : :class:`list`
+        Entries of the bibliography
+
+        Each entry is an object of type :class:`Entry`.
+
+
+    Examples
+    --------
+    Assume a BibTeX entry to exist in a multiline string ``bibtex_db``.
+    Converting this multiline string into a :obj:`Bibliography` object with
+    all the individual entries contained in :attr:`Bibliography.entries` as
+    :obj:`Entry` objects would look as follows:
+
+    .. code-block::
+
+        bibliography = Bibliography()
+        bibliography.from_bib(bibtex_db)
+
+    The individual entries in turn make the information contained accessible
+    for later conversion into a :obj:`bibrecord.record.Record` object.
+
+    For further details, see the documentation for :meth:`from_bib`.
+
+
+    .. versionadded:: 0.2
+
+    """
+
+    def __init__(self):
+        self.entries = []
+
+    def from_bib(self, bibliography=""):
+        r"""
+        Read BibTeX bibliography and convert it into individual entries.
+
+        Each entry is of type :class:`Entry`.
+
+        The bibliography is split on ``\n@``, *i.e.* a ``@`` sign following
+        a linebreak.
+
+
+        Parameters
+        ----------
+        bibliography : :class:`str`
+            BibTeX bibliography, *e.g.* read from a file
+
+        Raises
+        ------
+        ValueError
+            Raised if no ``bibliography`` is provided
+
+        """
+        if not bibliography:
+            raise ValueError
+        for block in bibliography.split("\n@"):
+            if block:
+                if not block.startswith("@"):
+                    block = f"@{block}"
+                entry = Entry()
+                entry.from_bib(block)
+                self.entries.append(entry)
+
+    def from_file(self, filename=""):
+        """
+        Read BibTeX bibliography and convert it into individual entries.
+
+        For details of how the file contents are parsed, see :meth:`from_bib`.
+
+        Parameters
+        ----------
+        filename : :class:`str`
+            Name of the BibTeX file to read bibliography from
+
+        """
+        if not filename:
+            raise ValueError
+        with open(filename, "r", encoding="utf8") as file:
+            bibliography = file.read()
+        self.from_bib(bibliography)
