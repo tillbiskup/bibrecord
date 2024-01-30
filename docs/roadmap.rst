@@ -10,8 +10,6 @@ For version 0.2
 
 * ``from_bib`` method for :class:`bibrecord.record.Record` class
 
-* ``dataset`` entry type
-
 
 For later versions
 ==================

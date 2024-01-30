@@ -883,6 +883,7 @@ class Dataset(Record):
 
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         key="",
