@@ -10,30 +10,40 @@ Virtual environment
 
 The whole development should take place inside a virtual python environment that should be located *outside* the project directory.
 
-To create a new virtual python environment, open a terminal and change to a a directory where the virtual environment should reside. Then type something like::
+To create a new virtual python environment, open a terminal and change to a a directory where the virtual environment should reside. Then type something like:
 
-  virtualenv bibrecord
+.. code-block:: bash
 
-or alternatively::
+    virtualenv bibrecord
 
-  python3 -m venv bibrecord
+or alternatively:
 
-This will create a virtual environment in the directory "bibrecord". To activate this virtual environment, use::
+.. code-block:: bash
 
-  source bibrecord/bin/activate
+    python3 -m venv bibrecord
 
-To deactivate, the command would simply be::
+This will create a virtual environment in the directory "bibrecord". To activate this virtual environment, use:
 
-  deactivate
+.. code-block:: bash
+
+    source bibrecord/bin/activate
+
+To deactivate, the command would simply be:
+
+.. code-block:: bash
+
+    deactivate
 
 
 Autoincrementing version numbers
 ================================
 
-The version number is contained in the file ``VERSION`` in the project root directory. To automatically increment the version number with every commit, use a git hook that calls the file ``bin/incrementVersion.sh``. Git hooks reside in the directory ``.git/hooks``. The simplest would be to create a new file ``pre-commit`` in this directory with the following content::
+The version number is contained in the file ``VERSION`` in the project root directory. To automatically increment the version number with every commit, use a git hook that calls the file ``bin/incrementVersion.sh``. Git hooks reside in the directory ``.git/hooks``. The simplest would be to create a new file ``pre-commit`` in this directory with the following content:
 
-  #!/bin/sh
-  bash bin/incrementVersion.sh
+.. code-block:: bash
+
+    #!/bin/sh
+    bash bin/incrementVersion.sh
 
 
 Make sure to set it to executable and have a line break (aka: new or empty line) at the end of the file. Otherwise, you man run into trouble, i.e., not having your version number updated automatically with each commit.
@@ -46,15 +56,50 @@ The bibrecord package follows good practice of the Python community regarding di
 
 (This) documentation resides inside the ``docs`` directory of the project root. The auto-generated :doc:`API documentation <api/index>` is in its own directory.
 
-A general overview of the overall package structure::
-
-  bin/
-  bibrecord/
-  docs/
-      api/
-  tests/
+A general overview of the overall package structure:
 
 
+.. code-block:: bash
+
+    bin/
+    bibrecord/
+    docs/
+        api/
+    tests/
+
+
+Code formatting
+===============
+
+Generally, code formatting follows :pep:`8` guidelines.
+
+A consistent code formatting is enforced using `Black <https://black.readthedocs.io/>`_, with the only change to the default settings being the line width of 78 characters (as compared to the standard of 88 characters). Use ``black -l 78`` on the command line, or, preferably, configure Black in your IDE. For PyCharm (starting with 2023.2), the settings can be found in ``Preferences`` | ``Settings`` > ``Tools`` > ``Black``. Here, set ``-l 78`` as command-line options via the ``Settings`` edit field. For older PyCharm versions or other IDEs/editors see the `official Black documentation <https://black.readthedocs.io/en/stable/integrations/editors.html>`_.
+
+To use Black, it needs to be installed. Either install it separately
+
+.. code-block:: bash
+
+    pip install black
+
+or install the bibrecord package with the appropriate dependencies:
+
+.. code-block:: bash
+
+    pip install bibrecord[dev]
+
+In case you are installing the bibrecord package in editable fashion (as usual for development purposes), use the following command from *within* the package directory (*i.e.*, the one containing the ``setup.py`` file):
+
+.. code-block::
+
+    pip install -e .[dev]
+
+To automatically format your Python code with every commit, use a git hook that calls the file ``bin/formatPythonFile.sh``. Git hooks reside in the directory ``.git/hooks``. The simplest would be to create a new file ``pre-commit`` with/add to the existing file in this directory the following content:
+
+.. code-block:: bash
+
+    ./bin/formatPythonFile.sh
+
+For static code analysis using Prospector, see the respective :ref:`section <sec_prospector>`.
 
 
 Docstring format
@@ -73,13 +118,21 @@ Developing the bibrecord package code should be done test-driven wherever possib
 Tests should be written using the Python :mod:`unittest` framework. Make sure that tests are independent of the respective local environment and clean up afterwards (using appropriate ``teardown`` methods).
 
 
+Metacode: Conveniently adding features
+======================================
+
+The bibrecord package is maintained using the `pymetacode Python package <https://python.docs.meta-co.de/>`_. In short, use the pymetacode ``pymeta`` command from the command line/terminal whenever you want to add modules, classes, or functions. This will ensure both a consistent overall style and organisation and automatically create the respective unittest stubs for you.
+
+
 Setting up the documentation build system
 =========================================
 
 The documentation is built using `Sphinx <https://sphinx-doc.org/>`_, `Python <https://python.org/>`_. Building requires using a shell, for example ``bash``.
 
 
-To install the necessary Python dependencies, create a virtual environment, e.g., with ``virtualenv <environment>``, and activate it afterwards with ``<environment>/bin/activate``. Then install the dependencies using ``pip``::
+To install the necessary Python dependencies, create a virtual environment, e.g., with ``virtualenv <environment>``, and activate it afterwards with ``<environment>/bin/activate``. Then install the dependencies using ``pip``:
+
+.. code-block:: bash
 
     pip install sphinx
     pip install sphinx-rtd-theme
@@ -98,16 +151,22 @@ To build the documentation for all releases and the current master branch:
   * ``cd`` to ``docs/``, then run ``make multiversion``. (To clean previously built documentation, run ``make clean`` first).
 
 
+.. _sec_prospector:
+
 Static code analysis with Prospector
 ====================================
 
-Static code analysis can be performed using `Prospector <http://prospector.landscape.io/en/master/>`_. First, install the necessary tools into the virtual environment created for the bibrecord package::
+Static code analysis can be performed using `Prospector <http://prospector.landscape.io/en/master/>`_. First, install the necessary tools into the virtual environment created for the bibrecord package:
+
+.. code-block:: bash
 
     pip install prospector[with_pyroma]
 
 The optional arguments ensure that all necessary dependencies are installed as well.
 
-Afterwards, simply run Prospector from a terminal from within your project root::
+Afterwards, simply run Prospector from a terminal from within your project root:
+
+.. code-block:: bash
 
     prospector
 

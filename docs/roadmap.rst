@@ -8,12 +8,6 @@ A few ideas how to develop the project further, currently a list as a reminder f
 For version 0.2
 ===============
 
-* Update user manual to reflect changes in Version 0.2
-
-* Update developer documentation (mention pymetacode, Makefile, black, ...)
-
-* CITATION.cff
-
 * Logo?
 
 

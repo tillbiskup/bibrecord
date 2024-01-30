@@ -10,7 +10,7 @@ Suppose you have implemented power-law noise and want to refer to the literature
 
 .. code-block::
 
-    reference = bibrecord.Article(
+    reference = bibrecord.record.Article(
         author=['J. Timmer', 'M. König'],
         title="On generating power law noise",
         journal="Astronomy and Astrophysics",

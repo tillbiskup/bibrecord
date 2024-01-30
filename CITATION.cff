@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it using these metadata.
+title: bibrecord
+abstract: >
+    Handling bibliographic records within (Python) source code
+authors:
+  - family-names: Biskup
+    given-names: Till
+    orcid: "https://orcid.org/0000-0003-2913-0004"
+type: software
+license: BSD
+repository-code: "https://github.com/tillbiskup/bibrecord"
+keywords:
+  - "bibliography"
+  - "bibtex"
+  - "literature"
+  - "cite"
+  - "references"
+# Highly recommended starting with the first release: DOI via Zenodo
+#identifiers:
+#  - description: "The concept DOI of the work."
+#    type: doi
+#    value: 10.5281/zenodo.########

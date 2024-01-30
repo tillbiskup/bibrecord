@@ -28,7 +28,7 @@ properties on object instantiation, this looks quite natural:
 
 .. code-block::
 
-    reference = bibrecord.Article(
+    reference = bibrecord.record.Article(
         author=['J. Timmer', 'M. König'],
         title="On generating power law noise",
         journal="Astronomy and Astrophysics",
@@ -49,7 +49,7 @@ In a more complete setting, showing a bit more code surrounding your class, this
 
         def __init__(self):
             # ... your other properties go here
-            self.reference = bibrecord.Article(
+            self.reference = bibrecord.record.Article(
                 author=['J. Timmer', 'M. König'],
                 title="On generating power law noise",
                 journal="Astronomy and Astrophysics",
@@ -133,3 +133,58 @@ records that should work well with BibTeX.
 .. note::
 
     As you can see, the bibrecord package is quite opinionated with respect to how a BibTeX record should look like. It uses curly brackets as delimiters for the fields of each key, not quotation marks, and capitalises the record type. Furthermore, unicode characters are directly output, hence it is your sole responsibility to use a BibTeX backend capable of dealing with unicode.
+
+
+Handling multiple bibliographic records
+=======================================
+
+If you "only" want to have a bibliographic record as an attribute in a class,
+say for an implementation of an algorithm where you would like to give credit
+to the people who originally described the algorithm, one of the subclasses of
+:class:`bibrecord.record.Record` is what you usually are interested in.
+
+However, suppose you write a package that contains data from different sources
+(*i.e.*, with different references) and you want to provide these references for
+each individual dataset. In this case, you will probably have a BibTeX
+bibliography file somewhere in the package data of your package that would be
+the original source of the bibliographic information. In this case, being able
+to convert this BibTeX bibliography file into an actionable representation for
+your package would come quite handy. This is what the :class:`Database` class
+provides you with.
+
+Creating such a database is a matter of only a few lines. Suppose your BibTeX
+database to reside in the file "literature.bib":
+
+.. code-block::
+
+    import bibrecord
+
+    bibliography = bibrecord.bibtex.Bibliography()
+    bibliography.from_file("literature.bib")
+    database = bibrecord.database.Database()
+    database.from_bibliography(bibliography)
+
+Now you can access all bibliographic records from your :obj:`Database` object.
+
+Assuming your database to contain the record used above several times, and having the associated BibTeX key ``timm-aaa-300-707``, adding this reference to a class in your code would simply become:
+
+.. code-block::
+
+
+    import bibrecord
+
+
+    bibliography = bibrecord.bibtex.Bibliography()
+    bibliography.from_file("literature.bib")
+    database = bibrecord.database.Database()
+    database.from_bibliography(bibliography)
+
+
+    class PowerLawNoise():
+
+        def __init__(self):
+            # ... your other properties go here
+            self.reference = database.records["timm-aaa-300-707"]
+
+
+Of course, if you need to access one bibliographic database in your entire code base in multiple modules, it might be sensible to create the ``database`` object on the top level of your package, *e.g.* in the ``__init__.py`` file, so that you can import it from everywhere. This is close to a singleton object in a sense.
