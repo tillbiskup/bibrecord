@@ -11,7 +11,7 @@ def read(filename):
 setuptools.setup(
     name="bibrecord",
     version=read("VERSION").strip(),
-    description="Handling bib(tex) records for references",
+    description="Handling bibliographic records within source code",
     long_description=read("README.rst"),
     long_description_content_type="text/x-rst",
     author="Till Biskup",
@@ -35,6 +35,9 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Intended Audience :: Science/Research",

@@ -143,13 +143,18 @@ class TestRecord(unittest.TestCase):
             self.record.from_bib(ARTICLE)
 
     def test_from_bib_sets_attributes(self):
+        self.record.title = ""
+        self.record.from_bib(RECORD)
+        self.assertEqual("Lorem ipsum", self.record.title)
+
+    def test_from_bib_sets_author(self):
         self.record.author = ""
         self.record.from_bib(RECORD)
-        self.assertEqual("John Doe", self.record.author)
+        self.assertEqual(["John Doe"], self.record.author)
 
     def test_from_bib_does_not_create_attributes(self):
         self.record.from_bib(RECORD)
-        self.assertFalse(hasattr(self.record, "author"))
+        self.assertFalse(hasattr(self.record, "title"))
 
 
 class TestPerson(unittest.TestCase):

@@ -146,6 +146,9 @@ class Entry:
         accordingly. Here, it does not matter whether values are surrounded by
         ``{`` or ``"`` and whether they have a trailing comma.
 
+        Authors and editors are split at the (case-insensitive) "AND" and stored
+        as a list of strings.
+
 
         Parameters
         ----------
@@ -155,12 +158,13 @@ class Entry:
         """
         self.record = bibtex_record
         self._parse_record()
+        self._convert_author_editor()
 
     def _parse_record(self):
         self.type = re.search(r"@([A-Za-z]+){", self.record).group(1).lower()
         self.key = re.search(r"@[A-Za-z]+{([^,]+),", self.record).group(1)
         self.fields = {}
-        for line in self.record.split("\n")[2:]:
+        for line in self.record.split("\n"):
             if "=" in line:
                 field, value = line.split("=")
                 value = re.match(
@@ -168,6 +172,12 @@ class Entry:
                     value.strip(),
                 ).group(1)
                 self.fields[field.strip()] = value
+
+    def _convert_author_editor(self):
+        for key in ["author", "editor"]:
+            if key in self.fields:
+                names = re.split("and", self.fields[key], flags=re.IGNORECASE)
+                self.fields[key] = [name.strip() for name in names]
 
 
 class Bibliography:

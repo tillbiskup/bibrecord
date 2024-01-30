@@ -6,7 +6,7 @@ from bibrecord import bibtex
 
 ARTICLE = """
 @Article{doe-foo-1-1,
-    author = {John Doe},
+    author = {John Doe and Jane Doe},
     title = {Lorem ipsum},
     journal = {Foo},
     pages = {1--2},
@@ -17,6 +17,16 @@ ARTICLE = """
 BOOK = """
 @Book{doe-j-2024,
     author = {John Doe},
+    title = {Lorem ipsum},
+    publisher = {Foo},
+    address = {Bar},
+    year = {2024}
+}
+"""
+
+EDITEDBOOK = """
+@Book{doe-j-2024,
+    editor = {John Doe},
     title = {Lorem ipsum},
     publisher = {Foo},
     address = {Bar},
@@ -57,6 +67,14 @@ class TestEntry(unittest.TestCase):
     def test_from_bib_sets_fields_dict(self):
         self.entry.from_bib(self.book_entry)
         self.assertTrue(self.entry.fields)
+
+    def test_from_bib_sets_author_as_list(self):
+        self.entry.from_bib(self.article_entry)
+        self.assertIsInstance(self.entry.fields["author"], list)
+
+    def test_from_bib_sets_editor_as_list(self):
+        self.entry.from_bib(EDITEDBOOK)
+        self.assertIsInstance(self.entry.fields["editor"], list)
 
 
 class TestBibliography(unittest.TestCase):
