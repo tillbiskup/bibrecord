@@ -112,6 +112,8 @@ Module documentation
 import logging
 import re
 
+from bibrecord import bibtex
+
 logger = logging.getLogger(__name__)
 
 
@@ -234,6 +236,36 @@ class Record:
         string_items = ",\n".join(items)
         output = f"@{self._type}{{{self.key},\n{string_items}\n}}"
         return output
+
+    def from_bib(self, bibtex_record=None):
+        """
+        Read BibTeX entry from string and parse the contents.
+
+        Currently, the format of the BibTeX records is quite restricted. For
+        details see :meth:`bibrecord.bibtex.Entry.from_bib`.
+
+        Parameters
+        ----------
+        bibtex_record : :class:`str`
+            Multiline string containing a BibTeX record
+
+        Raises
+        ------
+        ValueError
+            Raised if no ``bibtex_record`` is provided
+
+
+        .. versionadded:: 0.2
+
+        """
+        entry = bibtex.Entry()
+        entry.from_bib(bibtex_record)
+        if entry.type != self._type.lower():
+            raise ValueError()
+        self.key = entry.key
+        for key, value in entry.fields.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
     def _get_public_properties(self):
         properties = []

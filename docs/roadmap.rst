@@ -8,7 +8,8 @@ A few ideas how to develop the project further, currently a list as a reminder f
 For version 0.2
 ===============
 
-* ``from_bib`` method for :class:`bibrecord.record.Record` class
+* Class ``Bibliography`` or ``Database`` in :mod:`bibrecord.bibtex` module for reading and parsing BibTeX database files.
+* Module ``bibliography`` or ``databaase`` with class ``Database`` reading BibTeX bibliography files (via ``bibrecord.bibtex.Bibliography``) and creating record objects.
 
 
 For later versions

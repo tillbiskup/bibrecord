@@ -11,6 +11,14 @@ Version 0.2.0
 Not yet released
 
 
+New features
+------------
+
+* Class :class:`bibrecord.record.Dataset` for datasets.
+* Method :meth:`bibrecord.record.Record.from_bib` to read/populate records from BibTeX entries.
+* Module :mod:`bibrecord.bibtex` for basic handling of BibTeX bibliography files.
+
+
 Version 0.1.0
 =============
 

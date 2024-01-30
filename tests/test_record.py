@@ -3,6 +3,39 @@ import unittest
 from bibrecord import record
 
 
+# Dummy entry for testing the Record class
+RECORD = """
+@Record{doe-j-2024,
+    author = {John Doe},
+    title = {Lorem ipsum},
+    journal = {Foo},
+    pages = {1--2},
+    year = {2024}
+}
+"""
+
+
+ARTICLE = """
+@Article{doe-foo-1-1,
+    author = {John Doe},
+    title = {Lorem ipsum},
+    journal = {Foo},
+    pages = {1--2},
+    year = {2024}
+}
+"""
+
+BOOK = """
+@Book{doe-j-2024,
+    author = {John Doe},
+    title = {Lorem ipsum},
+    publisher = {Foo},
+    address = {Bar},
+    year = {2024}
+}
+"""
+
+
 class TestRecord(unittest.TestCase):
 
     def setUp(self):
@@ -100,6 +133,23 @@ class TestRecord(unittest.TestCase):
         self.record.author = ["John Doe", "Max Mustermann"]
         output = "@Record{,\n\tauthor = {John Doe AND Max Mustermann}\n}"
         self.assertEqual(self.record.to_bib(), output)
+
+    def test_from_bib_sets_key(self):
+        self.record.from_bib(RECORD)
+        self.assertEqual("doe-j-2024", self.record.key)
+
+    def test_from_bib_with_wrong_entry_type_raises(self):
+        with self.assertRaises(ValueError):
+            self.record.from_bib(ARTICLE)
+
+    def test_from_bib_sets_attributes(self):
+        self.record.author = ""
+        self.record.from_bib(RECORD)
+        self.assertEqual("John Doe", self.record.author)
+
+    def test_from_bib_does_not_create_attributes(self):
+        self.record.from_bib(RECORD)
+        self.assertFalse(hasattr(self.record, "author"))
 
 
 class TestPerson(unittest.TestCase):
@@ -319,6 +369,18 @@ class TestArticle(unittest.TestCase):
         output = "@Article{,\n\n}"
         self.assertEqual(self.article.to_bib(), output)
 
+    def test_from_bib_sets_fields(self):
+        self.article.from_bib(ARTICLE)
+        for attribute in [
+            "author",
+            "title",
+            "journal",
+            "volume",
+            "pages",
+            "year",
+        ]:
+            self.assertTrue(getattr(self, attribute))
+
 
 class TestBook(unittest.TestCase):
 
@@ -384,6 +446,17 @@ class TestBook(unittest.TestCase):
     def test_to_bib_returns_bibtex_record_with_correct_type(self):
         output = "@Book{,\n\n}"
         self.assertEqual(self.book.to_bib(), output)
+
+    def test_from_bib_sets_fields(self):
+        self.book.from_bib(BOOK)
+        for attribute in [
+            "author",
+            "title",
+            "publisher",
+            "year",
+            "address",
+        ]:
+            self.assertTrue(getattr(self, attribute))
 
 
 class TestDataset(unittest.TestCase):
