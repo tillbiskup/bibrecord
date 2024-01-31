@@ -17,7 +17,7 @@ ARTICLE = """
 BOOK = """
 @Book{doe-j-2024,
     author = {John Doe},
-    title = {Lorem ipsum},
+    title = {Lorem ipsum dolor sit amet},
     publisher = {Foo},
     address = {Bar},
     year = {2024}
@@ -75,6 +75,16 @@ class TestEntry(unittest.TestCase):
     def test_from_bib_sets_editor_as_list(self):
         self.entry.from_bib(EDITEDBOOK)
         self.assertIsInstance(self.entry.fields["editor"], list)
+
+    def test_from_bib_with_equals_sign_in_field_doesnt_split_field(self):
+        self.entry.from_bib(
+            ARTICLE.replace("{Lorem ipsum}", "{Lorem = ipsum}")
+        )
+        self.assertEqual("Lorem = ipsum", self.entry.fields["title"])
+
+    def test_from_bib_does_not_omit_first_field(self):
+        self.entry.from_bib(ARTICLE.strip())
+        self.assertTrue(self.entry.fields["author"])
 
 
 class TestBibliography(unittest.TestCase):

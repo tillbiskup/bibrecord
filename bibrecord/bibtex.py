@@ -164,9 +164,9 @@ class Entry:
         self.type = re.search(r"@([A-Za-z]+){", self.record).group(1).lower()
         self.key = re.search(r"@[A-Za-z]+{([^,]+),", self.record).group(1)
         self.fields = {}
-        for line in self.record.split("\n"):
+        for line in self.record.split("\n")[1:]:
             if "=" in line:
-                field, value = line.split("=")
+                field, value = line.split("=", maxsplit=1)
                 value = re.match(
                     r'^[{"]?(.+?)[}"]?,?$',
                     value.strip(),
