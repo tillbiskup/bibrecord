@@ -14,10 +14,22 @@ Not yet released
 New features
 ------------
 
-* Class :class:`bibrecord.record.Dataset` for datasets.
-* Method :meth:`bibrecord.record.Record.from_bib` to read/populate records from BibTeX entries.
-* Module :mod:`bibrecord.bibtex` for basic handling of BibTeX bibliography files.
-* Module :mod:`bibrecord.database` for handling multiple bibliographic records.
+* New bibliographic record type for datasets: :class:`bibrecord.record.Dataset`.
+* Read/populate records from BibTeX entries: :meth:`bibrecord.record.Record.from_bib`.
+* Handling multiple bibliographic records: module :mod:`bibrecord.database` and class :class:`bibrecord.database.Database`.
+* Basic handling of BibTeX bibliography files: module :mod:`bibrecord.bibtex`.
+
+
+Documentation
+-------------
+
+* Description of the :doc:`overall architecture <architecture>` of the package.
+
+
+Code quality
+------------
+
+* Automated code formatting using Black.
 
 
 Version 0.1.0

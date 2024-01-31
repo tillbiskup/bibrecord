@@ -18,6 +18,11 @@ For later versions
 
 * Adding all optional properties for record types?
 
+    * If so, differentiate between required and optional types?
+    * How to handle author/editor fields, where one needs to be present (are they mutually exclusive for some record types?)
+
+* String replacement in BibTeX records (*e.g.*, for journal names)
+
 * Explicitly support biblatex-defined record types?
 
   `<https://mirrors.ctan.org/macros/latex/contrib/biblatex/doc/biblatex.pdf>`_

@@ -91,7 +91,8 @@ This program is free software: you can redistribute it and/or modify it under th
    :hidden:
 
    people
-   developers
+   contributing
+   architecture
    changelog
    roadmap
    api/index
