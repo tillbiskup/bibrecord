@@ -1,6 +1,11 @@
-=======================
-bibrecord documentation
-=======================
+
+.. image:: images/zenodo.10607369.svg
+   :target: https://doi.org/10.5281/zenodo.10607369
+   :align: right
+
+=========
+bibrecord
+=========
 
 *Handling bibliographic records within source code.*
 

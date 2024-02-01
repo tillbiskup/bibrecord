@@ -3,6 +3,8 @@ message: If you use this software, please cite it using these metadata.
 title: bibrecord
 abstract: >
     Handling bibliographic records within (Python) source code
+
+    Did you ever feel the need of adding a reference to the literature to your code, e.g. to an article describing the algorithm you just (re)implemented? Are you somewhat familiar with how bibliographic records look like, e.g. from using BibTeX in conjunction with the TeX/LaTeX typesetting system? Then bibrecord may be the tool of choice for you.
 authors:
   - family-names: Biskup
     given-names: Till
@@ -16,3 +18,7 @@ keywords:
   - "literature"
   - "cite"
   - "references"
+identifiers:
+  - description: "The concept DOI of the work."
+    type: doi
+    value: 10.5281/zenodo.10607369

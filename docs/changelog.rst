@@ -8,7 +8,7 @@ This page contains a summary of changes between the official bibrecord releases.
 Version 0.2.0
 =============
 
-Not yet released
+Released 2024-02-01
 
 
 New features
