@@ -16,8 +16,3 @@ keywords:
   - "literature"
   - "cite"
   - "references"
-# Highly recommended starting with the first release: DOI via Zenodo
-#identifiers:
-#  - description: "The concept DOI of the work."
-#    type: doi
-#    value: 10.5281/zenodo.########
