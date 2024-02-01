@@ -5,7 +5,9 @@ This is the definite source of information for developers, besides having a look
 
 .. toctree::
     :maxdepth: 1
-    
+
+    bibrecord.bibtex
+    bibrecord.database
     bibrecord.record
 
 
@@ -13,4 +15,6 @@ Index
 -----
 
 * :ref:`genindex`
+
+
 
