@@ -34,9 +34,9 @@ The following types of bibliographic records are currently supported:
 * :class:`Dataset`
 
   Datasets are increasingly seen as independent research output that should be
-  citable. A typical use case of this record type would be a package containing
-  some published data where for each record, the relevant dataset should be
-  referenced.
+  citable. A typical use case of this record type would be a package
+  containing some published data where for each record, the relevant
+  dataset should be referenced.
 
 For details, have a look at the documentation of the respective classes.
 
@@ -67,7 +67,8 @@ Implementing additional types
 All types of bibliographic records inherit from :class:`Record`. Usually,
 there is not much left to do to implement an additional class, besides
 setting the properties (aka fields of the bibliographic record) in the
-constructor. However, a few things are crucial and deserve explicit mentioning:
+constructor. However, a few things are crucial and deserve explicit
+mentioning:
 
 * Attributes should be settable using the constructor.
 
@@ -128,7 +129,7 @@ class Record:
     Attributes
     ----------
     format : :class:`str`
-        Format string used create string representation of bibliographic record
+        Format string used to create string representation of record
 
         For details, see :meth:`to_string`
 
@@ -632,7 +633,7 @@ class Book(Record):
         Year the book was published
 
     address : :class:`str`
-        Address of the publisher of the book (usually the name of the city/town)
+        Address of the publisher of the book (usually the name of the place)
 
     edition : :class:`str`
         Information on the edition of the book (if not first edition)
@@ -797,8 +798,8 @@ class Dataset(Record):
     """
     Bibliographic record for a dataset.
 
-    Datasets are (fortunately) increasingly seen as independent research output
-    that should be citable. While published datasets are only as good
+    Datasets are (fortunately) increasingly seen as independent research
+    output that should be citable. While published datasets are only as good
     (and useful) as they are annotated, in general publishing data is an
     excellent idea.
 

@@ -15,8 +15,9 @@ of the :class:`Entry` class. This class does *not* provide extended logic for
 dealing with the particular types of bibliographic records, as this is part of
 the :mod:`bibrecord.record` module.
 
-Entire BibTeX bibliographies (as typically residing in \*.bib files) can be read
-and converted into :obj:`Entry` objects using the :class:`Bibliography` class.
+Entire BibTeX bibliographies (as typically residing in \*.bib files) can be
+read and converted into :obj:`Entry` objects using the
+:class:`Bibliography` class.
 
 
 Classes
@@ -59,12 +60,13 @@ class Entry:
     """
     Representation of a BibTeX entry.
 
-    Regardless of the type of BibTeX entry, this class will contain all relevant
-    information, such as type, key, and fields. This information can be used by
-    objects of type :class:`bibrecord.record.Record` to read their contents
-    from a BibTeX entry. The idea is to provide means by which the bibliographic
-    records contained in a BibTeX file can be read and converted into
-    :obj:`bibrecord.record.Record` objects of appropriate type.
+    Regardless of the type of BibTeX entry, this class will contain all
+    relevant information, such as type, key, and fields. This information
+    can be used by objects of type :class:`bibrecord.record.Record` to read
+    their contents from a BibTeX entry. The idea is to provide means by
+    which the bibliographic records contained in a BibTeX file can be read
+    and converted into :obj:`bibrecord.record.Record` objects of
+    appropriate type.
 
     Attributes
     ----------
@@ -138,16 +140,16 @@ class Entry:
             }
 
         Upon parsing such an entry, the attributes of the class :class:`Entry`
-        with the corresponding names will be set, *i.e.* :attr:`Entry.type` will
-        be set to the lower-case version of "TYPE", :attr:`Entry.key` to KEY,
-        et cetera.
+        with the corresponding names will be set, *i.e.* :attr:`Entry.type`
+        will be set to the lower-case version of "TYPE", :attr:`Entry.key`
+        to KEY, et cetera.
 
         All fields will be parsed and the :attr:`Entry.fields` dict populated
         accordingly. Here, it does not matter whether values are surrounded by
         ``{`` or ``"`` and whether they have a trailing comma.
 
-        Authors and editors are split at the (case-insensitive) "AND" and stored
-        as a list of strings.
+        Authors and editors are split at the (case-insensitive) "AND" and
+        stored as a list of strings.
 
 
         Parameters
