@@ -10,7 +10,8 @@ RECORD = """
     title = {Lorem ipsum},
     journal = {Foo},
     pages = {1--2},
-    year = {2024}
+    year = {2024},
+    doi = {10.1234/foo}
 }
 """
 
@@ -21,7 +22,8 @@ ARTICLE = """
     title = {Lorem ipsum},
     journal = {Foo},
     pages = {1--2},
-    year = {2024}
+    year = {2024},
+    doi = {10.1234/foo}
 }
 """
 
@@ -31,7 +33,8 @@ BOOK = """
     title = {Lorem ipsum},
     publisher = {Foo},
     address = {Bar},
-    year = {2024}
+    year = {2024},
+    doi = {10.1234/foo}
 }
 """
 
@@ -79,14 +82,19 @@ class TestRecord(unittest.TestCase):
         output = f"John Doe, Jr.: {self.record.title}"
         self.assertEqual(output, self.record.to_string())
 
-    def test_to_string_with_format_and_author_and_reverse_returns_string(
-        self,
-    ):
+    def test_to_string_with_format_and_author_and_reverse(self):
         self.record.format = "author: title"
         self.record.author = ["John Doe"]
         self.record.title = "Lorem ipsum"
         self.record.reverse = True
         output = f"Doe, John: {self.record.title}"
+        self.assertEqual(output, self.record.to_string())
+
+    def test_to_string_with_format_and_doi_returns_string(self):
+        self.record.format = "title. doi"
+        self.record.title = "Lorem ipsum"
+        self.record.doi = "10.1234/foo"
+        output = f"{self.record.title}. doi:{self.record.doi}"
         self.assertEqual(output, self.record.to_string())
 
     def test_has_to_bib_method(self):
@@ -334,6 +342,7 @@ class TestArticle(unittest.TestCase):
         self.volume = "42"
         self.pages = "0"
         self.year = "1968"
+        self.doi = "10.1234/foo"
 
     def test_instantiate_class(self):
         pass
@@ -362,11 +371,12 @@ class TestArticle(unittest.TestCase):
             volume=self.volume,
             pages=self.pages,
             year=self.year,
+            doi=self.doi,
         )
         authors = ", ".join(self.author)
         output = (
             f"{authors}: {self.title}. {self.journal} {self.volume}:"
-            f"{self.pages}, {self.year}."
+            f"{self.pages}, {self.year}. doi:{self.doi}"
         )
         self.assertEqual(output, article.to_string())
 
@@ -512,7 +522,7 @@ class TestDataset(unittest.TestCase):
         authors = ", ".join(self.author)
         output = (
             f"{authors}: {self.title} ({self.version}). {self.publisher},"
-            f" DOI:{self.doi}, "
+            f" doi:{self.doi}, "
             f"{self.year}."
         )
         self.assertEqual(output, dataset.to_string())
@@ -529,8 +539,7 @@ class TestDataset(unittest.TestCase):
         )
         editors = ", ".join(self.author)
         output = (
-            f"{editors} (Ed.): {self.title} ({self.version}). {self.publisher},"
-            f" DOI:{self.doi}, "
-            f"{self.year}."
+            f"{editors} (Ed.): {self.title} ({self.version})."
+            f" {self.publisher}, doi:{self.doi}, {self.year}."
         )
         self.assertEqual(output, dataset.to_string())

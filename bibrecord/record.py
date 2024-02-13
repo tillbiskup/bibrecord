@@ -168,6 +168,9 @@ class Record:
         The properties "author" and "editor" are treated specially, to ensure
         the names to be appropriately formatted.
 
+        Similarly, the property "doi" is treated specially, prefixing the
+        string "doi:" to make it easier to recognise.
+
         .. note::
             The aim of this method is currently in no way to allow for
             advanced formatting including conditionals, as possible with
@@ -185,6 +188,8 @@ class Record:
             value = getattr(self, prop)
             if prop in ["author", "editor"]:
                 value = ", ".join([self._person_to_string(x) for x in value])
+            if prop in ["doi"]:
+                value = f"doi:{value}"
             if value:
                 output = output.replace(prop, value)
         return output
@@ -582,7 +587,7 @@ class Article(Record):
         self.volume = volume
         self.pages = pages
         self.doi = doi
-        self.format = "author: title. journal volume:pages, year."
+        self.format = "author: title. journal volume:pages, year. doi"
         self._type = __class__.__name__
 
 
@@ -937,7 +942,7 @@ class Dataset(Record):
         self.version = version
         self.doi = doi
         self.url = url
-        self.format = "author: title (version). publisher, DOI:doi, year."
+        self.format = "author: title (version). publisher, doi, year."
         self._type = __class__.__name__
 
     def to_string(self):
