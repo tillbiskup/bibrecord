@@ -97,6 +97,12 @@ class TestRecord(unittest.TestCase):
         output = f"{self.record.title}. doi:{self.record.doi}"
         self.assertEqual(output, self.record.to_string())
 
+    def test_to_string_with_format_and_empty_doi_does_not_contain_doi(self):
+        self.record.format = "title. doi"
+        self.record.title = "Lorem ipsum"
+        self.record.doi = ""
+        self.assertNotIn("doi", self.record.to_string())
+
     def test_has_to_bib_method(self):
         self.assertTrue(hasattr(self.record, "to_bib"))
         self.assertTrue(callable(self.record.to_bib))

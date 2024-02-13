@@ -190,9 +190,9 @@ class Record:
             if prop in ["author", "editor"]:
                 value = ", ".join([self._person_to_string(x) for x in value])
             if prop in ["doi"]:
-                value = f"doi:{value}"
-            if value:
-                output = output.replace(prop, value)
+                if value:
+                    value = f"doi:{value}"
+            output = output.replace(prop, value)
         return output
 
     def to_bib(self):

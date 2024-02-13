@@ -11,6 +11,19 @@ Version 0.3.0
 Not yet released
 
 
+Version 0.2.1
+=============
+
+Not yet released
+
+
+Fixes
+-----
+
+* DOI gets output and prefixed with "doi:" for article, book, and dataset record types.
+* Placeholders in format template for string output get replaced with empty value if not present in record.
+
+
 Version 0.2.0
 =============
 
