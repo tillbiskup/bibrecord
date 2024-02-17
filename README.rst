@@ -1,8 +1,13 @@
-=======================
-bibrecord documentation
-=======================
 
-Welcome! This is the documentation for bibrecord, a Python package for handling bibliographic records within source code.
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.10607369.svg
+   :target: https://doi.org/10.5281/zenodo.10607369
+   :align: right
+
+=========
+bibrecord
+=========
+
+*Handling bibliographic records within source code.*
 
 Did you ever feel the need of adding a reference to the literature to your code, *e.g.* to an article describing the algorithm you just (re)implemented? Are you somewhat familiar with how bibliographic records look like, *e.g.* from using BibTeX in conjunction with the TeX/LaTeX typesetting system? Then bibrecord may be the tool of choice for you.
 
@@ -51,12 +56,6 @@ And to make it even more convenient for users and future-proof:
 * Developed fully test-driven
 
 * Extensive user and API documentation
-
-
-
-.. warning::
-
-  bibrecord is currently under active development and still considered in Beta development state. Therefore, expect frequent changes in features and public APIs that may break your own code. Nevertheless, feedback as well as feature requests are highly welcome.
 
 
 Installation

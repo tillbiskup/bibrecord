@@ -1,16 +1,21 @@
-=======================
-bibrecord documentation
-=======================
 
-Welcome! This is the documentation for bibrecord, a Python package for handling bibliographic records within source code.
+.. image:: images/zenodo.10607369.svg
+   :target: https://doi.org/10.5281/zenodo.10607369
+   :align: right
 
-Did you ever feel the need of adding a reference to the literature to your code, *e.g.* to an article describing the algorithm you just (re)implemented? Are you somewhat familiar with how bibliographic records look like, *e.g.* from using BibTeX in conjunction with the TeX/LaTeX typesetting system? Then bibrecord may be the tool of choice for you.
+=========
+bibrecord
+=========
+
+*Handling bibliographic records within source code.*
+
+Did you ever feel the need of **adding literature references to your (Python) code**, *e.g.* to an article describing the algorithm you just (re)implemented? Did you ever think: "Wouldn't it be useful to automatically output this reference in a generated report or else?" Are you somewhat familiar with how bibliographic records look like, *e.g.* from using BibTeX in conjunction with the TeX/LaTeX typesetting system? Then bibrecord may be the tool of choice for you.
 
 Suppose you have implemented power-law noise and want to refer to the literature to give credit to those guys whose algorithm you've implemented. In this case, you could add the following record as an attribute to your class:
 
 .. code-block::
 
-    reference = bibrecord.Article(
+    reference = bibrecord.record.Article(
         author=['J. Timmer', 'M. König'],
         title="On generating power law noise",
         journal="Astronomy and Astrophysics",
@@ -50,15 +55,11 @@ And to make it even more convenient for users and future-proof:
 
 * Open source project written in Python (>= 3.7)
 
+* Pure Python, no external libraries/packages required
+
 * Developed fully test-driven
 
 * Extensive user and API documentation
-
-
-
-.. warning::
-
-  bibrecord is currently under active development and still considered in Beta development state. Therefore, expect frequent changes in features and public APIs that may break your own code. Nevertheless, feedback as well as feature requests are highly welcome.
 
 
 Installation
@@ -69,6 +70,8 @@ To install the bibrecord package on your computer (sensibly within a Python virt
 .. code-block:: bash
 
     pip install bibrecord
+
+For more details, see the :doc:`installation instructions <installing>`.
 
 
 License
@@ -93,7 +96,8 @@ This program is free software: you can redistribute it and/or modify it under th
    :hidden:
 
    people
-   developers
+   contributing
+   architecture
    changelog
    roadmap
    api/index

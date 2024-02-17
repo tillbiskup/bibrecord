@@ -31,6 +31,13 @@ The following types of bibliographic records are currently supported:
   and in science the second important type besides articles appearing in
   journals.
 
+* :class:`Dataset`
+
+  Datasets are increasingly seen as independent research output that should be
+  citable. A typical use case of this record type would be a package
+  containing some published data where for each record, the relevant
+  dataset should be referenced.
+
 For details, have a look at the documentation of the respective classes.
 
 
@@ -60,7 +67,8 @@ Implementing additional types
 All types of bibliographic records inherit from :class:`Record`. Usually,
 there is not much left to do to implement an additional class, besides
 setting the properties (aka fields of the bibliographic record) in the
-constructor. However, a few things are crucial and deserve explicit mentioning:
+constructor. However, a few things are crucial and deserve explicit
+mentioning:
 
 * Attributes should be settable using the constructor.
 
@@ -105,6 +113,8 @@ Module documentation
 import logging
 import re
 
+from bibrecord import bibtex
+
 logger = logging.getLogger(__name__)
 
 
@@ -119,7 +129,7 @@ class Record:
     Attributes
     ----------
     format : :class:`str`
-        Format string used create string representation of bibliographic record
+        Format string used to create string representation of record
 
         For details, see :meth:`to_string`
 
@@ -140,12 +150,12 @@ class Record:
 
     """
 
-    def __init__(self, key=''):
+    def __init__(self, key=""):
         self.key = key
-        self.format = ''
+        self.format = ""
         self.reverse = False
         self._type = __class__.__name__
-        self._exclude = ['reverse', 'key', 'format']
+        self._exclude = ["reverse", "key", "format"]
 
     def to_string(self):
         """
@@ -158,6 +168,9 @@ class Record:
 
         The properties "author" and "editor" are treated specially, to ensure
         the names to be appropriately formatted.
+
+        Similarly, the property "doi" is treated specially, prefixing the
+        string "doi:" to make it easier to recognise.
 
         .. note::
             The aim of this method is currently in no way to allow for
@@ -174,10 +187,12 @@ class Record:
         output = self.format
         for prop in self._get_public_properties():
             value = getattr(self, prop)
-            if prop in ['author', 'editor']:
-                value = ', '.join([self._person_to_string(x) for x in value])
-            if value:
-                output = output.replace(prop, value)
+            if prop in ["author", "editor"]:
+                value = ", ".join([self._person_to_string(x) for x in value])
+            if prop in ["doi"]:
+                if value:
+                    value = f"doi:{value}"
+            output = output.replace(prop, value)
         return output
 
     def to_bib(self):
@@ -219,18 +234,49 @@ class Record:
         for prop in self._get_public_properties():
             if getattr(self, prop):
                 value = getattr(self, prop)
-                if prop in ['author', 'editor']:
-                    value = ' AND '.join([self._person_to_string(x, bib=True)
-                                          for x in value])
+                if prop in ["author", "editor"]:
+                    value = " AND ".join(
+                        [self._person_to_string(x, bib=True) for x in value]
+                    )
                 items.append(f"\t{prop} = {{{value}}}")
-        string_items = ',\n'.join(items)
+        string_items = ",\n".join(items)
         output = f"@{self._type}{{{self.key},\n{string_items}\n}}"
         return output
+
+    def from_bib(self, bibtex_record=None):
+        """
+        Read BibTeX entry from string and parse the contents.
+
+        Currently, the format of the BibTeX records is quite restricted. For
+        details see :meth:`bibrecord.bibtex.Entry.from_bib`.
+
+        Parameters
+        ----------
+        bibtex_record : :class:`str`
+            Multiline string containing a BibTeX record
+
+        Raises
+        ------
+        ValueError
+            Raised if no ``bibtex_record`` is provided
+
+
+        .. versionadded:: 0.2
+
+        """
+        entry = bibtex.Entry()
+        entry.from_bib(bibtex_record)
+        if entry.type != self._type.lower():
+            raise ValueError()
+        self.key = entry.key
+        for key, value in entry.fields.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
     def _get_public_properties(self):
         properties = []
         for prop in list(self.__dict__.keys()):
-            if not str(prop).startswith('_') and prop not in self._exclude:
+            if not str(prop).startswith("_") and prop not in self._exclude:
                 properties.append(prop)
         return properties
 
@@ -305,7 +351,7 @@ class Person:
 
     """
 
-    def __init__(self, first='', last='', particle='', suffix=''):
+    def __init__(self, first="", last="", particle="", suffix=""):
         self.first = first
         self.last = last
         self.particle = particle
@@ -336,18 +382,18 @@ class Person:
 
         """
         # Reduce additional whitespace
-        string = re.sub(r'\s{2,}', r' ', string.strip())
-        parts = string.split(',')
+        string = re.sub(r"\s{2,}", r" ", string.strip())
+        parts = string.split(",")
         if len(parts) > 2:
             self.suffix = parts.pop(1).strip()
         if len(parts) > 1:
             self.first = parts[1].strip()
-            last_parts = parts[0].strip().rsplit(' ', maxsplit=1)
+            last_parts = parts[0].strip().rsplit(" ", maxsplit=1)
             if len(last_parts) > 1:
                 self.particle = last_parts.pop(0)
             self.last = last_parts[0]
         else:
-            self.first, self.last = string.rsplit(' ', maxsplit=1)
+            self.first, self.last = string.rsplit(" ", maxsplit=1)
 
     def to_string(self):
         """
@@ -369,13 +415,13 @@ class Person:
         """
         last = self.last
         if self.particle:
-            last = f'{self.particle} {self.last}'
+            last = f"{self.particle} {self.last}"
         if self.suffix:
-            last = f'{last}, {self.suffix}'
+            last = f"{last}, {self.suffix}"
         if self.reverse:
-            output = f'{last}, {self.first}'
+            output = f"{last}, {self.first}"
         else:
-            output = f'{self.first} {last}'
+            output = f"{self.first} {last}"
         return output
 
     def to_bib(self):
@@ -523,8 +569,17 @@ class Article(Record):
     """
 
     # pylint: disable=too-many-arguments
-    def __init__(self, key='', author=None, title='', journal='', year='',
-                 volume='', pages='', doi=''):
+    def __init__(
+        self,
+        key="",
+        author=None,
+        title="",
+        journal="",
+        year="",
+        volume="",
+        pages="",
+        doi="",
+    ):
         super().__init__(key=key)
         self.author = author or []
         self.title = title
@@ -533,7 +588,7 @@ class Article(Record):
         self.volume = volume
         self.pages = pages
         self.doi = doi
-        self.format = 'author: title. journal volume:pages, year.'
+        self.format = "author: title. journal volume:pages, year. doi"
         self._type = __class__.__name__
 
 
@@ -578,7 +633,7 @@ class Book(Record):
         Year the book was published
 
     address : :class:`str`
-        Address of the publisher of the book (usually the name of the city/town)
+        Address of the publisher of the book (usually the name of the place)
 
     edition : :class:`str`
         Information on the edition of the book (if not first edition)
@@ -656,8 +711,8 @@ class Book(Record):
     Thus, you can easily create a BibTeX bibliography from your bibliography
     records that should work well with BibTeX.
 
-    Similarly, if you have a book that has an editor (or a list of editors) 
-    rather than an author/authors, you would define your bibliographic 
+    Similarly, if you have a book that has an editor (or a list of editors)
+    rather than an author/authors, you would define your bibliographic
     record like so:
 
     .. code-block::
@@ -690,8 +745,17 @@ class Book(Record):
     """
 
     # pylint: disable=too-many-arguments
-    def __init__(self, key='', author=None, editor=None, title='',
-                 publisher='', year='', address='', edition=''):
+    def __init__(
+        self,
+        key="",
+        author=None,
+        editor=None,
+        title="",
+        publisher="",
+        year="",
+        address="",
+        edition="",
+    ):
         super().__init__(key=key)
         self.author = author or []
         self.editor = editor or []
@@ -700,7 +764,7 @@ class Book(Record):
         self.year = year
         self.address = address
         self.edition = edition
-        self.format = 'author: title. publisher, address year.'
+        self.format = "author: title. publisher, address year."
         self._type = __class__.__name__
 
     def to_string(self):
@@ -726,5 +790,184 @@ class Book(Record):
 
         """
         if self.editor:
-            self.format = self.format.replace('author', 'editor (Ed.)')
+            self.format = self.format.replace("author", "editor (Ed.)")
+        return super().to_string()
+
+
+class Dataset(Record):
+    """
+    Bibliographic record for a dataset.
+
+    Datasets are (fortunately) increasingly seen as independent research
+    output that should be citable. While published datasets are only as good
+    (and useful) as they are annotated, in general publishing data is an
+    excellent idea.
+
+    The class currently closely follows the fields available from Zenodo.
+    Furthermore, the dataset record type is not part of the original BibTeX
+    record types (as the idea of publishing datasets is much younger than
+    BibTeX), but is included in biblatex starting with version 3.13.
+
+
+    Attributes
+    ----------
+    author : :class:`list`
+        List of author names (as strings)
+
+        Note: You should only provide either authors or editors.
+
+    editor : :class:`list`
+        List of editor names (as strings)
+
+        Note: You should only provide either authors or editors.
+
+    title : :class:`str`
+        Title of the dataset
+
+    publisher : :class:`str`
+        Name of the publisher of the dataset (*e.g.*, "Zenodo")
+
+    year : :class:`str`
+        Year the dataset was published
+
+    version : :class:`str`
+        Version of the dataset cited
+
+        Note that datasets often have version numbers or strings
+
+    doi : :class:`str`
+        Digital object identifier referring to the dataset
+
+    url : :class:`str`
+        Uniform Resource Location (URL) referring to the dataset
+
+    Examples
+    --------
+    One use case (and the original reason for writing this package) is to
+    specify a bibliographic record within another class, for example in case
+    you've implemented an algorithm and want to give credit to the original
+    authors in a somewhat portable way. As you can directly give the
+    properties on object instantiation, this looks quite natural:
+
+    .. code-block::
+
+        reference = Dataset(
+            author=['John Doe'],
+            title="Lorem ipsum",
+            publisher="Zenodo",
+            year="2024",
+            version="2024-01-29",
+            doi="10.5281/zenodo.00000000",
+        )
+
+    If you would want to output the above reference as a string, simply use
+    the :meth:`to_string` method:
+
+    .. code-block::
+
+        reference.to_string()
+
+    With the default format, this would result in the following text:
+
+    .. code-block:: text
+
+        John Doe: Lorem ipsum (2024-01-29).
+        Zenodo, DOI:10.5281/zenodo.00000000, 2024.
+
+    Note that the line break is a matter of display here and not contained
+    in the original string output. Of course, if you would like to revert
+    the names, *i.e.* having the first name printed last, this can be done
+    as well:
+
+    .. code-block::
+
+        reference.reverse = True
+        reference.to_string()
+
+    With the default format, this would result in the following text:
+
+    .. code-block:: text
+
+        Doe, John: Lorem ipsum (2024-01-29).
+        Zenodo, DOI:10.5281/zenodo.00000000, 2024.
+
+    If you would want to create a BibTeX record from this, make sure to
+    first add a key:
+
+    .. code-block::
+
+        reference.key = 'timm-aaa-300-707'
+        reference.to_bib()
+
+    The output of ``print(reference.to_bib())`` would look as follows:
+
+    .. code-block:: text
+
+        @Dataset{,
+            author = {John Doe},
+            title = {Lorem ipsum},
+            publisher = {Zenodo},
+            year = {2024},
+            version = {2024-01-29},
+            doi = {10.5281/zenodo.00000000}
+        }
+
+    Thus, you can easily create a BibTeX bibliography from your bibliography
+    records that should work well with BibTeX/biblatex.
+
+
+    .. versionadded:: 0.2
+
+
+    """
+
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        key="",
+        author=None,
+        editor=None,
+        title="",
+        publisher="",
+        year="",
+        version="",
+        doi="",
+        url="",
+    ):
+        super().__init__(key=key)
+        self.author = author or []
+        self.editor = editor or []
+        self.title = title
+        self.publisher = publisher
+        self.year = year
+        self.version = version
+        self.doi = doi
+        self.url = url
+        self.format = "author: title (version). publisher, doi, year."
+        self._type = __class__.__name__
+
+    def to_string(self):
+        """
+        Return string representation of a bibliographic record.
+
+        The format of the resulting string is controlled by the property
+        :attr:`format`. There, you can use all the public properties of the
+        class that form part of the bibliographic record, such as "author",
+        "title", and alike.
+
+        The properties "author" and "editor" are treated specially, to ensure
+        the names to be appropriately formatted. Furthermore, in case of the
+        :attr:`editor` property not being empty, the editors' rather than
+        the authors' names are listed, and "(Ed.)" added to the end.
+
+        For further details of this method, see :meth:`Record.to_string`.
+
+        Returns
+        -------
+        output : :class:`str`
+            String representation of a bibliography record
+
+        """
+        if self.editor:
+            self.format = self.format.replace("author", "editor (Ed.)")
         return super().to_string()
