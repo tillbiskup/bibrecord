@@ -86,6 +86,16 @@ class TestEntry(unittest.TestCase):
         self.entry.from_bib(ARTICLE.strip())
         self.assertTrue(self.entry.fields["author"])
 
+    def test_from_bib_with_author_name_starting_with_and(self):
+        self.entry.from_bib(
+            ARTICLE.replace(
+                "{John Doe and Jane Doe}", "{John Doe and Anna Andrle}"
+            )
+        )
+        self.assertListEqual(
+            ["John Doe", "Anna Andrle"], self.entry.fields["author"]
+        )
+
 
 class TestBibliography(unittest.TestCase):
     def setUp(self):
