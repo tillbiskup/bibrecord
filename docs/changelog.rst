@@ -11,6 +11,17 @@ Version 0.3.0
 Not yet released
 
 
+Version 0.2.2
+=============
+
+Not yet released
+
+Fixes
+-----
+
+* Author names starting with "and" work.
+
+
 Version 0.2.1
 =============
 

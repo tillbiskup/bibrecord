@@ -178,7 +178,9 @@ class Entry:
     def _convert_author_editor(self):
         for key in ["author", "editor"]:
             if key in self.fields:
-                names = re.split("and", self.fields[key], flags=re.IGNORECASE)
+                names = re.split(
+                    " and ", self.fields[key], flags=re.IGNORECASE
+                )
                 self.fields[key] = [name.strip() for name in names]
 
 
